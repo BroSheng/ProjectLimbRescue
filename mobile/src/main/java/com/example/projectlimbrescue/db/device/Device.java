@@ -20,5 +20,5 @@ public class Device {
 
     // A short description of the device's type, e.g. FOSSIL_GEN_5, enumerated in DeviceDesc.
     @ColumnInfo(name = "desc")
-    public SensorDesc desc;
+    public DeviceDesc desc;
 }

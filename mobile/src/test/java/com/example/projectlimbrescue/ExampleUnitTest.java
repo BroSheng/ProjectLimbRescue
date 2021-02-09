@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.projectlimbrescue;
 
 import org.junit.Test;
 

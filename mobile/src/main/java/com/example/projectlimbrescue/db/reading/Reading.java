@@ -3,6 +3,7 @@ package com.example.projectlimbrescue.db.reading;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import com.example.projectlimbrescue.db.sensor.Sensor;
@@ -20,25 +21,31 @@ It numerically represents some output recorded by the sensor.
 @Entity ( foreignKeys = {
     @ForeignKey(
         entity = Session.class,
-        parentColumns = "id",
+        parentColumns = "session_id",
         childColumns = "session_id",
         onDelete = ForeignKey.CASCADE
     ),
     @ForeignKey (
             entity = Device.class,
-            parentColumns = "id",
+            parentColumns = "device_id",
             childColumns = "device_id",
             onDelete = ForeignKey.CASCADE
     ),
     @ForeignKey (
             entity = Sensor.class,
-            parentColumns = "id",
+            parentColumns = "sensor_id",
             childColumns = "sensor_id",
             onDelete = ForeignKey.CASCADE
-    )})
+    )},
+    indices = {
+        @Index("session_id"),
+        @Index("device_id"),
+        @Index("sensor_id")
+    })
 public class Reading {
-    @PrimaryKey
-    public long id;
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "reading_id")
+    public long readingId;
 
     @ColumnInfo(name = "session_id")
     public long sessionId;

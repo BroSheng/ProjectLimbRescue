@@ -15,7 +15,7 @@ public class SensorWithReadings {
     @Embedded
     public Sensor sensor;
     @Relation(
-        parentColumn = "id",
+        parentColumn = "sensor_id",
         entityColumn = "sensor_id"
     )
     public List<Reading> readings;

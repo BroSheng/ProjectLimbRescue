@@ -15,7 +15,7 @@ public class SessionWithReadings {
     @Embedded
     public Session session;
     @Relation(
-        parentColumn = "id",
+        parentColumn = "session_id",
         entityColumn = "session_id"
     )
     public List<Reading> readings;

@@ -33,16 +33,16 @@ public interface SessionDao {
     @Query("SELECT * FROM Session")
     List<SessionWithSensors> getSessionsWithSensors();
 
-    @Query("SELECT * FROM Session WHERE id IN (:ids)")
+    @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
     List<Session> getSessionsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Session WHERE id IN (:ids)")
+    @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
     List<SessionWithDevices> getSessionsWithDevicesByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Session WHERE id IN (:ids)")
+    @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
     List<SessionWithReadings> getSessionsWithReadingsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Session WHERE id IN (:ids)")
+    @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
     List<SessionWithSensors> getSessionsWithSensorsByIds(int[] ids);
 
     @Insert

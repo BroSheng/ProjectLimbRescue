@@ -3,6 +3,7 @@ package com.example.projectlimbrescue.db.device;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
+import androidx.room.Index;
 
 import com.example.projectlimbrescue.db.sensor.Sensor;
 
@@ -16,16 +17,20 @@ and a sensor type can be found in any number of devices.
     foreignKeys = {
         @ForeignKey(
             entity = Device.class,
-            parentColumns = "id",
+            parentColumns = "device_id",
             childColumns = "device_id",
             onDelete = ForeignKey.CASCADE
         ),
         @ForeignKey(
             entity = Sensor.class,
-            parentColumns = "id",
+            parentColumns = "sensor_id",
             childColumns = "sensor_id",
             onDelete = ForeignKey.CASCADE
         )
+    },
+    indices = {
+            @Index("device_id"),
+            @Index("sensor_id")
     }
 )
 public class DeviceContainsSensor {

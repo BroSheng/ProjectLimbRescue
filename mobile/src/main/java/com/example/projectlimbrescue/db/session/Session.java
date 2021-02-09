@@ -10,14 +10,15 @@ and/or multiple devices over the same time period.
 
 @Entity
 public class Session {
-    @PrimaryKey
-    public long id;
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "session_id")
+    public long sessionId;
 
     // The start timestamp of the session, e.g. 2021-02-03 12:01:36.0000
     @ColumnInfo(name = "start_time")
-    Timestamp startTime;
+    public Timestamp startTime;
 
     // The end timestamp of the session, e.g. 2021-02-03 12:02:54.0000
     @ColumnInfo(name = "end_time")
-    Timestamp endTime;
+    public Timestamp endTime;
 }

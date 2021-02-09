@@ -32,16 +32,16 @@ public interface SensorDao {
     @Query("SELECT * FROM Sensor")
     List<SensorWithSessions> getSensorWithSessions();
 
-    @Query("SELECT * FROM Sensor WHERE id IN (:ids)")
-    List<Device> getSensorsByIds(int[] ids);
+    @Query("SELECT * FROM Sensor WHERE sensor_id IN (:ids)")
+    List<Sensor> getSensorsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Sensor WHERE id IN (:ids)")
+    @Query("SELECT * FROM Sensor WHERE sensor_id IN (:ids)")
     List<SensorWithDevices> getSensorsWithDevicesByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Sensor WHERE id IN (:ids)")
+    @Query("SELECT * FROM Sensor WHERE sensor_id IN (:ids)")
     List<SensorWithReadings> getSensorsWithReadingsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Sensor WHERE id IN (:ids)")
+    @Query("SELECT * FROM Sensor WHERE sensor_id IN (:ids)")
     List<SensorWithSessions> getSensorsWithSessionsByIds(int[] ids);
 
     @Insert

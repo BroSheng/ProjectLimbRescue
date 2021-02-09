@@ -14,10 +14,11 @@ rather than a single particular watch or scale.
 
 @Entity
 public class Device {
-    @PrimaryKey
-    public long id;
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "device_id")
+    public long deviceId;
 
     // A short description of the device's type, e.g. FOSSIL_GEN_5, enumerated in DeviceDesc.
     @ColumnInfo(name = "desc")
-    SensorDesc desc;
+    public SensorDesc desc;
 }

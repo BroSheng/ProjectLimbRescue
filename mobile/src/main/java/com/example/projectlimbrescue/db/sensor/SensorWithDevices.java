@@ -17,7 +17,7 @@ public class SensorWithDevices {
     @Embedded
     public Sensor sensor;
     @Relation(
-        parentColumn = "id",
+        parentColumn = "sensor_id",
         entityColumn = "device_id",
         associateBy = @Junction(DeviceContainsSensor.class)
     )

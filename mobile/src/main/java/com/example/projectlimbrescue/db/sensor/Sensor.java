@@ -12,10 +12,11 @@ rather than a single particular one on a device.
 
 @Entity
 public class Sensor {
-    @PrimaryKey
-    public long id;
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "sensor_id")
+    public long sensorId;
 
     // A short description of the sensor's type, e.g. PPG, enumerated in SensorDesc.
     @ColumnInfo(name = "desc")
-    SensorDesc desc;
+    public SensorDesc desc;
 }

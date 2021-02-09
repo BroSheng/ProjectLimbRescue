@@ -27,16 +27,16 @@ public interface DeviceDao {
     @Query("SELECT * FROM Device")
     List<DeviceWithSessions> getDevicesWithSessions();
 
-    @Query("SELECT * FROM Device WHERE id IN (:ids)")
+    @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<Device> getDevicesByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Device WHERE id IN (:ids)")
+    @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<DeviceWithReadings> getDevicesWithReadingsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Device WHERE id IN (:ids)")
+    @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<DeviceWithSensors> getDevicesWithSensorsByIds(int[] ids);
     @Transaction
-    @Query("SELECT * FROM Device WHERE id IN (:ids)")
+    @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<DeviceWithSessions> getDevicesWithSessionsByIds(int[] ids);
 
     @Insert

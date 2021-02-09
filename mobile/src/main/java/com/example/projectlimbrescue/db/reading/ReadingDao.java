@@ -21,10 +21,10 @@ Data access object for the Reading entity, providing the methods used to query t
 public interface ReadingDao {
     // Simple "placeholder" methods for now; add more in as functionality or testing requires
     @Query("SELECT * FROM Reading")
-    List<Device> getReadings();
+    List<Reading> getReadings();
 
-    @Query("SELECT * FROM Reading WHERE id IN (:ids)")
-    List<Device> getReadingsByIds(int[] ids);
+    @Query("SELECT * FROM Reading WHERE reading_id IN (:ids)")
+    List<Reading> getReadingsByIds(int[] ids);
 
     @Insert
     void insert(Reading... readings);

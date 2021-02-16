@@ -64,7 +64,7 @@ public class SensorDaoTest {
         sensor.desc = SensorDesc.PPG;
 
         sensorDao.insert(sensor);
-        List<Sensor> sensors = sensorDao.getSensors();
+        List<Sensor> sensors = sensorDao.getSensorsByIds(new int[]{123});
 
         assertEquals(sensors.get(0).sensorId, sensor.sensorId);
         assertEquals(sensors.get(0).desc, sensor.desc);

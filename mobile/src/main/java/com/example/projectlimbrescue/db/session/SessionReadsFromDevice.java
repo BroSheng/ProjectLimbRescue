@@ -35,7 +35,7 @@ and a device can be recorded from during any number of sessions.
 )
 public class SessionReadsFromDevice {
     @ColumnInfo(name = "session_id")
-    long sessionId;
+    public long sessionId;
     @ColumnInfo(name = "device_id")
-    long deviceId;
+    public long deviceId;
 }

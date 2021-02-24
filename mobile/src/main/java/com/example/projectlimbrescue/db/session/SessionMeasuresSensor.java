@@ -35,7 +35,7 @@ and a sensor can be recorded during any number of sessions.
 )
 public class SessionMeasuresSensor {
     @ColumnInfo(name = "session_id")
-    long sessionId;
+    public long sessionId;
     @ColumnInfo(name = "sensor_id")
-    long sensorId;
+    public long sensorId;
 }

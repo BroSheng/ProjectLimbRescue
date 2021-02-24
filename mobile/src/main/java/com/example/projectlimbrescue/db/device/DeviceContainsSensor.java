@@ -35,7 +35,7 @@ and a sensor type can be found in any number of devices.
 )
 public class DeviceContainsSensor {
     @ColumnInfo(name = "device_id")
-    long deviceId;
+    public long deviceId;
     @ColumnInfo(name = "sensor_id")
-    long sensorId;
+    public long sensorId;
 }

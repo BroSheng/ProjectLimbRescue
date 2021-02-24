@@ -87,13 +87,7 @@ public class ReadingDaoTest {
         readingDao.insert(reading);
         List<Reading> readings = readingDao.getReadings();
 
-        assertEquals(readings.get(0).readingId, reading.readingId);
-        assertEquals(readings.get(0).sessionId, reading.sessionId);
-        assertEquals(readings.get(0).deviceId, reading.deviceId);
-        assertEquals(readings.get(0).sensorId, reading.sensorId);
-        assertEquals(readings.get(0).timestamp, reading.timestamp);
-        assertEquals(readings.get(0).value, reading.value, 0.0001);
-        assertEquals(readings.get(0).limb, reading.limb);
+        DbTestUtils.assertReadingEquals(reading, readings.get(0));
     }
 
     @Test
@@ -128,13 +122,7 @@ public class ReadingDaoTest {
         readingDao.insert(reading);
         List<Reading> readings = readingDao.getReadingsByIds(new int[]{123});
 
-        assertEquals(readings.get(0).readingId, reading.readingId);
-        assertEquals(readings.get(0).sessionId, reading.sessionId);
-        assertEquals(readings.get(0).deviceId, reading.deviceId);
-        assertEquals(readings.get(0).sensorId, reading.sensorId);
-        assertEquals(readings.get(0).timestamp, reading.timestamp);
-        assertEquals(readings.get(0).value, reading.value, 0.0001);
-        assertEquals(readings.get(0).limb, reading.limb);
+        DbTestUtils.assertReadingEquals(reading, readings.get(0));
     }
 
     @Test
@@ -179,21 +167,8 @@ public class ReadingDaoTest {
         readingDao.insert(reading2);
         List<Reading> readings = readingDao.getReadingsByIds(new int[]{123, 234});
 
-        assertEquals(readings.get(0).readingId, reading1.readingId);
-        assertEquals(readings.get(0).sessionId, reading1.sessionId);
-        assertEquals(readings.get(0).deviceId, reading1.deviceId);
-        assertEquals(readings.get(0).sensorId, reading1.sensorId);
-        assertEquals(readings.get(0).timestamp, reading1.timestamp);
-        assertEquals(readings.get(0).value, reading1.value, 0.0001);
-        assertEquals(readings.get(0).limb, reading1.limb);
-
-        assertEquals(readings.get(1).readingId, reading2.readingId);
-        assertEquals(readings.get(1).sessionId, reading2.sessionId);
-        assertEquals(readings.get(1).deviceId, reading2.deviceId);
-        assertEquals(readings.get(1).sensorId, reading2.sensorId);
-        assertEquals(readings.get(1).timestamp, reading2.timestamp);
-        assertEquals(readings.get(1).value, reading2.value, 0.0001);
-        assertEquals(readings.get(1).limb, reading2.limb);
+        DbTestUtils.assertReadingEquals(reading1, readings.get(0));
+        DbTestUtils.assertReadingEquals(reading2, readings.get(1));
     }
 
     @Test

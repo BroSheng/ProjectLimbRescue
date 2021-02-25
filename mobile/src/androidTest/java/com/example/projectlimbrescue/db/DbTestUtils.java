@@ -22,7 +22,7 @@ public class DbTestUtils {
         assertEquals(expected.readingId, actual.readingId);
         assertEquals(expected.sensorId, actual.sensorId);
         assertEquals(expected.sessionId, actual.sessionId);
-        assertEquals(expected.timestamp, actual.timestamp);
+        assertEquals(expected.time, actual.time);
         assertEquals(expected.value, actual.value, 0.01f);
     }
 

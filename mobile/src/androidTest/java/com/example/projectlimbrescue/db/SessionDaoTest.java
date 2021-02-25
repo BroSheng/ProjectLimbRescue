@@ -295,7 +295,7 @@ public class SessionDaoTest {
         reading.readingId = 456;
         reading.sensorId = 123;
         reading.sessionId = session.sessionId;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -334,7 +334,7 @@ public class SessionDaoTest {
         reading.readingId = 456;
         reading.sensorId = 123;
         reading.sessionId = session.sessionId;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -378,7 +378,7 @@ public class SessionDaoTest {
         reading1.readingId = 123;
         reading1.sensorId = 123;
         reading1.sessionId = session1.sessionId;
-        reading1.timestamp = new Timestamp(1000);
+        reading1.time = 1000;
         reading1.value = 123.456f;
         reading1.limb = ReadingLimb.LEFT_ARM;
 
@@ -387,7 +387,7 @@ public class SessionDaoTest {
         reading2.readingId = 456;
         reading2.sensorId = 123;
         reading2.sessionId = session2.sessionId;
-        reading2.timestamp = new Timestamp(1000);
+        reading2.time = 1000;
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 
@@ -430,7 +430,7 @@ public class SessionDaoTest {
         reading1.readingId = 123;
         reading1.sensorId = 123;
         reading1.sessionId = session.sessionId;
-        reading1.timestamp = new Timestamp(1000);
+        reading1.time = 1000;
         reading1.value = 123.456f;
         reading1.limb = ReadingLimb.LEFT_ARM;
 
@@ -439,7 +439,7 @@ public class SessionDaoTest {
         reading2.readingId = 456;
         reading2.sensorId = 123;
         reading2.sessionId = session.sessionId;
-        reading2.timestamp = new Timestamp(1000);
+        reading2.time = 1000;
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 

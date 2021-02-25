@@ -80,7 +80,7 @@ public class ReadingDaoTest {
         reading.sessionId = 456;
         reading.deviceId = 789;
         reading.sensorId = 012;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -115,7 +115,7 @@ public class ReadingDaoTest {
         reading.sessionId = 456;
         reading.deviceId = 789;
         reading.sensorId = 012;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -150,7 +150,7 @@ public class ReadingDaoTest {
         reading1.sessionId = 456;
         reading1.deviceId = 789;
         reading1.sensorId = 012;
-        reading1.timestamp = new Timestamp(1000);
+        reading1.time = 1000;
         reading1.value = 123.456f;
         reading1.limb = ReadingLimb.LEFT_ARM;
 
@@ -159,7 +159,7 @@ public class ReadingDaoTest {
         reading2.sessionId = 456;
         reading2.deviceId = 789;
         reading2.sensorId = 012;
-        reading2.timestamp = new Timestamp(2000);
+        reading2.time = 1000;
         reading2.value = 789.012f;
         reading2.limb = ReadingLimb.RIGHT_ARM;
 
@@ -196,7 +196,7 @@ public class ReadingDaoTest {
         reading.sessionId = 456;
         reading.deviceId = 789;
         reading.sensorId = 012;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 

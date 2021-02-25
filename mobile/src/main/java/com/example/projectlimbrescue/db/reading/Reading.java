@@ -54,8 +54,8 @@ public class Reading {
     @ColumnInfo(name = "sensor_id")
     public long sensorId;
 
-    // The timestamp when the reading was taken, e.g. 2021-02-03 12:01:37.5500
-    public Timestamp timestamp;
+    // The number of nanos since the start of the reading's session, for ordering readings
+    public long time;
 
     // The raw data value recorded in the reading, e.g. 12034.035
     public float value;

@@ -155,7 +155,7 @@ public class DeviceDaoTest {
         reading.readingId = 456;
         reading.sensorId = 789;
         reading.sessionId = 012;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -196,7 +196,7 @@ public class DeviceDaoTest {
         reading.readingId = 456;
         reading.sensorId = 789;
         reading.sessionId = 012;
-        reading.timestamp = new Timestamp(1000);
+        reading.time = 1000;
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
@@ -241,7 +241,7 @@ public class DeviceDaoTest {
         reading1.readingId = 123;
         reading1.sensorId = 789;
         reading1.sessionId = 012;
-        reading1.timestamp = new Timestamp(1000);
+        reading1.time = 1000;
         reading1.value = 123.456f;
         reading1.limb = ReadingLimb.LEFT_ARM;
 
@@ -250,7 +250,7 @@ public class DeviceDaoTest {
         reading2.readingId = 456;
         reading2.sensorId = 789;
         reading2.sessionId = 012;
-        reading2.timestamp = new Timestamp(1000);
+        reading2.time = 1000;
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 
@@ -298,7 +298,7 @@ public class DeviceDaoTest {
         reading1.readingId = 123;
         reading1.sensorId = 789;
         reading1.sessionId = 012;
-        reading1.timestamp = new Timestamp(1000);
+        reading1.time = 1000;
         reading1.value = 123.456f;
         reading1.limb = ReadingLimb.LEFT_ARM;
 
@@ -307,7 +307,7 @@ public class DeviceDaoTest {
         reading2.readingId = 456;
         reading2.sensorId = 789;
         reading2.sessionId = 012;
-        reading2.timestamp = new Timestamp(1000);
+        reading2.time = 1000;
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 

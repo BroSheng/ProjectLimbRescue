@@ -8,12 +8,11 @@
 
     <com.androidplot.xy.XYPlot
         android:id="@+id/plot"
-        style="@style/APDefacto.Dark"
-        ap:domainTitle="domain"
-        ap:lineLabelRotationBottom="-45"
+        style="@style/APDefacto.Light"
+        ap:domainTitle="seconds"
         ap:lineLabels="left|bottom"
-        ap:rangeTitle="range"
-        ap:title="A Simple XY Plot"
+        ap:rangeTitle="rate"
+        ap:title="PPG Readings at 30hz"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         app:layout_constraintBottom_toBottomOf="parent"

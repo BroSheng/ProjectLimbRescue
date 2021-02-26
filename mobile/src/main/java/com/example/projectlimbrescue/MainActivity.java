@@ -5,6 +5,10 @@ import android.graphics.DashPathEffect;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+
 import com.androidplot.util.PixelUtils;
 import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.CatmullRomInterpolator;
@@ -32,23 +36,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
-    private XYPlot plot;
+    private static final String XVALUES = "xvalues";
+    private static final String YVALUES = "yvalues";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // initialize our XYPlot reference:
-        plot = findViewById(R.id.plot);
-
-        // enable pinch/zoom
-        PanZoom.attach(plot);
-
-        List<Number> xVals = new ArrayList<>();
-        List<Number> yVals = new ArrayList<>();
+        // get data for graph
+        List<Long> xVals = new ArrayList<>();
+        List<Double> yVals = new ArrayList<>();
 
         // get data from CSV file
         try {
@@ -59,6 +59,7 @@ public class MainActivity extends Activity {
             while (myReader.hasNextLine()) {
                 data = myReader.nextLine();
                 String[] nums = data.split(",");
+                xVals.add(Long.parseLong(nums[0]));
                 yVals.add(Double.parseDouble(nums[1]));
             }
             myReader.close();
@@ -66,31 +67,28 @@ public class MainActivity extends Activity {
             e.printStackTrace();
         }
 
-        for (int i = 0; i < yVals.size(); i++) {
-            xVals.add(i * (1.0 / 30));
+        // convert since I have no easy way of doing this
+        long[] xValues = new long[xVals.size()];
+        double[] yValues = new double[yVals.size()];
+        for (int i = 0; i < xVals.size(); i++) {
+            xValues[i] = xVals.get(i);
+            yValues[i] = yVals.get(i);
         }
 
-        // turn the above arrays into XYSeries
-        XYSeries series1 = new SimpleXYSeries(xVals, yVals, "heart rate");
+        FragmentManager fm = getSupportFragmentManager();
+        Fragment fragment = fm.findFragmentById(R.id.fragment_container_view);
 
-        // create formatters to use for drawing a series using LineAndPointRenderer
-        // and configure them from xml:
-        LineAndPointFormatter series1Format =
-                new LineAndPointFormatter(this, R.xml.line_point_formatter);
-
-        // just for fun, add some smoothing to the lines:
-        // see: http://androidplot.com/smooth-curves-and-androidplot/
-        series1Format.setInterpolationParams(
-                new CatmullRomInterpolator.Params(10, CatmullRomInterpolator.Type.Centripetal));
-
-        // add a new series' to the xyplot:
-        plot.addSeries(series1, series1Format);
-
-        //plot.setDomainBoundaries(0, xVals.size() * (1.0/30), BoundaryMode.FIXED);
-        //plot.setDomainStep(StepMode.INCREMENT_BY_VAL, 1);
-        //plot.setRangeBoundaries(0, 0.1, BoundaryMode.AUTO);
-        //plot.setRangeStep(StepMode.INCREMENT_BY_VAL, 0.01);
-
-
+        // initialize GraphFragment
+        if (fragment == null) {
+            Bundle bundle = new Bundle();
+            bundle.putLongArray(XVALUES, xValues);
+            bundle.putDoubleArray(YVALUES, yValues);
+            fragment = new GraphFragment();
+            fragment.setArguments(bundle);
+            fm.beginTransaction()
+                    .setReorderingAllowed(true)
+                    .add(R.id.fragment_container_view, fragment)
+                    .commit();
+        }
     }
 }

@@ -1,3 +1,4 @@
+include ':shared'
 rootProject.name = 'LimbRescue'
 include 'mobile'
 include 'wear'

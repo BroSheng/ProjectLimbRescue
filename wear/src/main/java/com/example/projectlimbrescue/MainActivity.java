@@ -8,12 +8,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.example.myapplication.R;
 import com.example.shared.Reading;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -28,14 +26,8 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 /*
  * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some
@@ -50,8 +42,8 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
     private boolean isLogging = false;
     private SensorManager mSensorManager;
-    private int ppgSensor = 0;
-    private LinkedList<Reading> readingQueue = new LinkedList<>();
+    private final int ppgSensor = 0;
+    private final LinkedList<Reading> readingQueue = new LinkedList<>();
     private long startTime;
     private TextView text;
 

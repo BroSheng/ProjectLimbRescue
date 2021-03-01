@@ -1,9 +1,5 @@
 package com.example.projectlimbrescue;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,7 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.myapplication.R;
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.shared.Reading;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -29,10 +28,6 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,10 +40,9 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     private Button mSendStartMessageBtn;
     private TextView mTextView;
-
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
-    private LinkedList<Reading> readings = new LinkedList<>();
+    private final LinkedList<Reading> readings = new LinkedList<>();
 
 
     @Override
@@ -189,8 +183,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     }
 
     private void setupViews() {
-        mSendStartMessageBtn = (Button) findViewById(R.id.start_activity);
-        mTextView = (TextView) findViewById(R.id.textView);
+        mSendStartMessageBtn = findViewById(R.id.start_activity);
+        mTextView = findViewById(R.id.textView);
     }
 
     private class StartWearableActivityTask extends AsyncTask<Void, Void, Void> {

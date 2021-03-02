@@ -29,7 +29,8 @@ import com.example.projectlimbrescue.db.session.SessionReadsFromDeviceDao;
                 SessionMeasuresSensor.class,
                 SessionReadsFromDevice.class
         },
-        version = 1
+        version = 1,
+        exportSchema = false
 )
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {

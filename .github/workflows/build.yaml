@@ -1,7 +1,7 @@
 name: Build
 on:
   push:
-    branches: [main]
+    branches: *
   pull_request:
     branches: [main]
 
@@ -11,9 +11,15 @@ jobs:
     steps:
       - name: Checkout the code
         uses: actions/checkout@v2
+
       - name: Setup JDK
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+
       - name: Build the app
         run: ./gradlew assembleDebug --stacktrace
+
+      - name: Test the app
+        run: ./gradlew test
+

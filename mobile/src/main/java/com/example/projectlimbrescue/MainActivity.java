@@ -1,7 +1,6 @@
 package com.example.projectlimbrescue;
 
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.shared.Reading;
+import com.example.shared.SensorReading;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private TextView mTextView;
     private static final String START_ACTIVITY_PATH = "/start-activity";
 
-    private final LinkedList<Reading> readings = new LinkedList<>();
+    private final LinkedList<SensorReading> readings = new LinkedList<>();
 
 
     @Override
@@ -118,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     public void onStartWearableActivityClick(View view) {
         Log.d(TAG, "Generating RPC");
 
-        new StartWearableActivityTask().execute();
+        new StartWearableActivityTask().run();
         String stop = "Stop";
         mSendStartMessageBtn.setText(stop);
         mTextView.setText("");
@@ -175,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         }
 
         StringBuilder sb = new StringBuilder();
-        for (Reading reading : readings) {
-            String r = reading.channel0 + " " + reading.channel1 + " " + reading.time + "\n";
+        for (SensorReading reading : readings) {
+            String r = reading.value + " " + reading.timestamp + "\n";
             sb.append(r);
         }
         mTextView.setText(sb);
@@ -187,15 +186,14 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         mTextView = findViewById(R.id.textView);
     }
 
-    private class StartWearableActivityTask extends AsyncTask<Void, Void, Void> {
+    private class StartWearableActivityTask extends Thread {
 
         @Override
-        protected Void doInBackground(Void... args) {
+        public void run() {
             Collection<String> nodes = getNodes();
             for (String node : nodes) {
                 sendStartActivityMessage(node);
             }
-            return null;
         }
     }
 }

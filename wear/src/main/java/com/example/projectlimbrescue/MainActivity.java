@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.example.shared.Reading;
+import com.example.shared.SensorReading;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
@@ -43,7 +43,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
     private boolean isLogging = false;
     private SensorManager mSensorManager;
     private final int ppgSensor = 0;
-    private final LinkedList<Reading> readingQueue = new LinkedList<>();
+    private final LinkedList<SensorReading> readingQueue = new LinkedList<>();
     private long startTime;
     private TextView text;
 
@@ -175,7 +175,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
     @Override
     public void onSensorChanged(SensorEvent event) {
         if(event.sensor.getType() == ppgSensor) {
-            readingQueue.add(new Reading(event.timestamp, event.values[0], event.values[1]));
+            readingQueue.add(new SensorReading(event.timestamp, event.values[0]));
         }
     }
 

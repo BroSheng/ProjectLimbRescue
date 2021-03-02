@@ -24,10 +24,10 @@ public interface ReadingDao {
     List<Reading> getReadings();
 
     @Query("SELECT * FROM Reading WHERE reading_id IN (:ids)")
-    List<Reading> getReadingsByIds(int[] ids);
+    List<Reading> getReadingsByIds(long[] ids);
 
     @Insert
-    void insert(Reading... readings);
+    long[] insert(Reading... readings);
 
     @Delete
     void delete(Reading reading);

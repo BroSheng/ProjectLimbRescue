@@ -120,7 +120,7 @@ public class ReadingDaoTest {
         reading.limb = ReadingLimb.LEFT_ARM;
 
         readingDao.insert(reading);
-        List<Reading> readings = readingDao.getReadingsByIds(new int[]{123});
+        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123});
 
         DbTestUtils.assertReadingEquals(reading, readings.get(0));
     }
@@ -165,7 +165,7 @@ public class ReadingDaoTest {
 
         readingDao.insert(reading1);
         readingDao.insert(reading2);
-        List<Reading> readings = readingDao.getReadingsByIds(new int[]{123, 234});
+        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123, 234});
 
         DbTestUtils.assertReadingEquals(reading1, readings.get(0));
         DbTestUtils.assertReadingEquals(reading2, readings.get(1));

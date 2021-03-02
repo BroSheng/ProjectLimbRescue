@@ -93,7 +93,7 @@ public class SessionDaoTest {
         session.endTime = new Timestamp(2000);
 
         sessionDao.insert(session);
-        List<Session> sessions = sessionDao.getSessionsByIds(new int[]{123});
+        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123});
 
         DbTestUtils.assertSessionEquals(session, sessions.get(0));
     }
@@ -111,7 +111,7 @@ public class SessionDaoTest {
         session2.endTime = new Timestamp(2000);
 
         sessionDao.insert(session1, session2);
-        List<Session> sessions = sessionDao.getSessionsByIds(new int[]{123, 456});
+        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123, 456});
 
         DbTestUtils.assertSessionEquals(session1, sessions.get(0));
         DbTestUtils.assertSessionEquals(session2, sessions.get(1));
@@ -182,7 +182,7 @@ public class SessionDaoTest {
         sessionReadsFromDevice.deviceId = device.deviceId;
         sessionReadsFromDeviceDao.insert(sessionReadsFromDevice);
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new int[]{123});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123});
         Session foundSession = sessionsWithDevices.get(0).session;
         List<Device> foundDevices = sessionsWithDevices.get(0).devices;
 
@@ -218,7 +218,7 @@ public class SessionDaoTest {
         session2ReadsFromDevice.deviceId = device.deviceId;
         sessionReadsFromDeviceDao.insert(session1ReadsFromDevice, session2ReadsFromDevice);
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new int[]{123, 456});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456});
         Session foundSession1 = sessionsWithDevices.get(0).session;
         Session foundSession2 = sessionsWithDevices.get(1).session;
         List<Device> foundDevices1 = sessionsWithDevices.get(0).devices;
@@ -257,7 +257,7 @@ public class SessionDaoTest {
         sessionReadsFromDevice2.deviceId = device2.deviceId;
         sessionReadsFromDeviceDao.insert(sessionReadsFromDevice1, sessionReadsFromDevice2);
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new int[]{123, 456});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456});
         Session foundSession = sessionsWithDevices.get(0).session;
         List<Device> foundDevices = sessionsWithDevices.get(0).devices;
 
@@ -341,7 +341,7 @@ public class SessionDaoTest {
         sessionDao.insert(session);
         readingDao.insert(reading);
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new int[]{123});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123});
         Session foundSession = sessionsWithReadings.get(0).session;
         List<Reading> foundReadings = sessionsWithReadings.get(0).readings;
 
@@ -394,7 +394,7 @@ public class SessionDaoTest {
         sessionDao.insert(session1, session2);
         readingDao.insert(reading1, reading2);
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new int[]{123, 456});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123, 456});
         Session foundSession1 = sessionsWithReadings.get(0).session;
         Session foundSession2 = sessionsWithReadings.get(1).session;
         List<Reading> foundReadings1 = sessionsWithReadings.get(0).readings;
@@ -446,7 +446,7 @@ public class SessionDaoTest {
         sessionDao.insert(session);
         readingDao.insert(reading1, reading2);
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new int[]{123});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123});
         Session foundSession = sessionsWithReadings.get(0).session;
         List<Reading> foundReadings = sessionsWithReadings.get(0).readings;
 
@@ -505,7 +505,7 @@ public class SessionDaoTest {
         sessionMeasuresSensor.sensorId = sensor.sensorId;
         sessionMeasuresSensorDao.insert(sessionMeasuresSensor);
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new int[]{123});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123});
         Session foundSession = sessionsWithSensors.get(0).session;
         List<Sensor> foundSensors = sessionsWithSensors.get(0).sensors;
 
@@ -541,7 +541,7 @@ public class SessionDaoTest {
         session2MeasuresSensor.sensorId = sensor.sensorId;
         sessionMeasuresSensorDao.insert(session1MeasuresSensor, session2MeasuresSensor);
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new int[]{123, 456});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123, 456});
         Session foundSession1 = sessionsWithSensors.get(0).session;
         Session foundSession2 = sessionsWithSensors.get(1).session;
         List<Sensor> foundSensors1 = sessionsWithSensors.get(0).sensors;
@@ -580,7 +580,7 @@ public class SessionDaoTest {
         sessionMeasuresSensor2.sensorId = sensor2.sensorId;
         sessionMeasuresSensorDao.insert(sessionMeasuresSensor1, sessionMeasuresSensor2);
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new int[]{123});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123});
         Session foundSession = sessionsWithSensors.get(0).session;
         List<Sensor> foundSensors = sessionsWithSensors.get(0).sensors;
 

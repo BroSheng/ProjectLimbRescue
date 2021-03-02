@@ -34,19 +34,19 @@ public interface SessionDao {
     List<SessionWithSensors> getSessionsWithSensors();
 
     @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
-    List<Session> getSessionsByIds(int[] ids);
+    List<Session> getSessionsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
-    List<SessionWithDevices> getSessionsWithDevicesByIds(int[] ids);
+    List<SessionWithDevices> getSessionsWithDevicesByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
-    List<SessionWithReadings> getSessionsWithReadingsByIds(int[] ids);
+    List<SessionWithReadings> getSessionsWithReadingsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Session WHERE session_id IN (:ids)")
-    List<SessionWithSensors> getSessionsWithSensorsByIds(int[] ids);
+    List<SessionWithSensors> getSessionsWithSensorsByIds(long[] ids);
 
     @Insert
-    void insert(Session... sessions);
+    long[] insert(Session... sessions);
 
     @Delete
     void delete(Session session);

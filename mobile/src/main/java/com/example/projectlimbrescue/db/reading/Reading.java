@@ -58,7 +58,7 @@ public class Reading {
     public long time;
 
     // The raw data value recorded in the reading, e.g. 12034.035
-    public float value;
+    public double value;
 
     // The body limb or combination of limbs being measured, e.g. LEFT_ARM, enumerated in ReadingLimb.
     public ReadingLimb limb;

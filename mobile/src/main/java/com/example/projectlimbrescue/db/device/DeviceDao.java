@@ -31,16 +31,19 @@ public interface DeviceDao {
     List<Device> getDevicesByIds(int[] ids);
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithReadings> getDevicesWithReadingsByIds(int[] ids);
+    List<DeviceWithReadings> getDevicesWithReadingsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithSensors> getDevicesWithSensorsByIds(int[] ids);
+    List<DeviceWithSensors> getDevicesWithSensorsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithSessions> getDevicesWithSessionsByIds(int[] ids);
+    List<DeviceWithSessions> getDevicesWithSessionsByIds(long[] ids);
+
+    @Query("SELECT * FROM Device WHERE `desc` = :desc")
+    List<Device> getDevicesByDesc (DeviceDesc desc);
 
     @Insert
-    void insert(Device... devices);
+    long[] insert(Device... devices);
 
     @Delete
     void delete(Device device);

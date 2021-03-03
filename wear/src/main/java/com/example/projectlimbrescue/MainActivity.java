@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.widget.TextView;
 
-import com.example.myapplication.R;
+import com.example.projectlimbrescue.R;
 
 /*
  * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some

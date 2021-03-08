@@ -17,9 +17,9 @@ public class DeviceWithSessions {
     @Embedded
     public Device device;
     @Relation(
-        parentColumn = "device_id",
-        entityColumn = "session_id",
-        associateBy = @Junction(SessionReadsFromDevice.class)
+            parentColumn = "device_id",
+            entityColumn = "session_id",
+            associateBy = @Junction(SessionReadsFromDevice.class)
     )
     public List<Session> sessions;
 }

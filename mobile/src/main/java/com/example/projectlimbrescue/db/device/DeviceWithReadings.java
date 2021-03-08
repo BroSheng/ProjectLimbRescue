@@ -15,8 +15,8 @@ public class DeviceWithReadings {
     @Embedded
     public Device device;
     @Relation(
-        parentColumn = "device_id",
-        entityColumn = "device_id"
+            parentColumn = "device_id",
+            entityColumn = "device_id"
     )
     public List<Reading> readings;
 }

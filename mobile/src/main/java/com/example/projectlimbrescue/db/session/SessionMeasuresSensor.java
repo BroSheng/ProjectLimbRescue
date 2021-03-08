@@ -13,25 +13,25 @@ A session can record data from any number of sensors,
 and a sensor can be recorded during any number of sessions.
  */
 
-@Entity (primaryKeys = {"session_id", "sensor_id"},
-    foreignKeys = {
-        @ForeignKey(
-            entity = Session.class,
-            parentColumns = "session_id",
-            childColumns = "session_id",
-            onDelete = ForeignKey.CASCADE
-        ),
-        @ForeignKey(
-            entity = Sensor.class,
-            parentColumns = "sensor_id",
-            childColumns = "sensor_id",
-            onDelete = ForeignKey.CASCADE
-        )
-    },
-    indices = {
-            @Index("session_id"),
-            @Index("sensor_id")
-    }
+@Entity(primaryKeys = {"session_id", "sensor_id"},
+        foreignKeys = {
+                @ForeignKey(
+                        entity = Session.class,
+                        parentColumns = "session_id",
+                        childColumns = "session_id",
+                        onDelete = ForeignKey.CASCADE
+                ),
+                @ForeignKey(
+                        entity = Sensor.class,
+                        parentColumns = "sensor_id",
+                        childColumns = "sensor_id",
+                        onDelete = ForeignKey.CASCADE
+                )
+        },
+        indices = {
+                @Index("session_id"),
+                @Index("sensor_id")
+        }
 )
 public class SessionMeasuresSensor {
     @ColumnInfo(name = "session_id")

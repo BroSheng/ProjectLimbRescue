@@ -1,5 +1,9 @@
 package com.example.projectlimbrescue.db.session;
-import androidx.room.*;
+
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.sql.Timestamp;
 
 /*

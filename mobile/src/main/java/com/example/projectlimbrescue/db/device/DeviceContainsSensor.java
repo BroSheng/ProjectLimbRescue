@@ -13,25 +13,25 @@ A device can contain any number of sensor types,
 and a sensor type can be found in any number of devices.
  */
 
-@Entity (primaryKeys = {"device_id", "sensor_id"},
-    foreignKeys = {
-        @ForeignKey(
-            entity = Device.class,
-            parentColumns = "device_id",
-            childColumns = "device_id",
-            onDelete = ForeignKey.CASCADE
-        ),
-        @ForeignKey(
-            entity = Sensor.class,
-            parentColumns = "sensor_id",
-            childColumns = "sensor_id",
-            onDelete = ForeignKey.CASCADE
-        )
-    },
-    indices = {
-            @Index("device_id"),
-            @Index("sensor_id")
-    }
+@Entity(primaryKeys = {"device_id", "sensor_id"},
+        foreignKeys = {
+                @ForeignKey(
+                        entity = Device.class,
+                        parentColumns = "device_id",
+                        childColumns = "device_id",
+                        onDelete = ForeignKey.CASCADE
+                ),
+                @ForeignKey(
+                        entity = Sensor.class,
+                        parentColumns = "sensor_id",
+                        childColumns = "sensor_id",
+                        onDelete = ForeignKey.CASCADE
+                )
+        },
+        indices = {
+                @Index("device_id"),
+                @Index("sensor_id")
+        }
 )
 public class DeviceContainsSensor {
     @ColumnInfo(name = "device_id")

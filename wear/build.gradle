@@ -30,5 +30,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.wear:wear:1.1.0'
+    implementation project(path: ':shared')
     compileOnly 'com.google.android.wearable:wearable:2.8.1'   
 }

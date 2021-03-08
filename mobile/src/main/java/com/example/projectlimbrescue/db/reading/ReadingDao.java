@@ -4,12 +4,6 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
-import androidx.room.Transaction;
-
-import com.example.projectlimbrescue.db.device.Device;
-import com.example.projectlimbrescue.db.device.DeviceWithReadings;
-import com.example.projectlimbrescue.db.device.DeviceWithSensors;
-import com.example.projectlimbrescue.db.device.DeviceWithSessions;
 
 import java.util.List;
 

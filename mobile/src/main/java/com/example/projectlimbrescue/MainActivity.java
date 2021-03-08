@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -131,7 +132,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     @WorkerThread
     private void sendStartActivityMessage(String node) {
-        Task<Integer> sendMessageTask = Wearable.getMessageClient(this).sendMessage(node, START_ACTIVITY_PATH, new byte[0]);
+        Task<Integer> sendMessageTask = Wearable.getMessageClient(this)
+                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(System.nanoTime()));
 
         try {
             // Block on a task and get the result synchronously (because this is on a background
@@ -176,6 +178,12 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private void setupViews() {
         mSendStartMessageBtn = findViewById(R.id.start_activity);
         mTextView = findViewById(R.id.textView);
+    }
+
+    private byte[] longToByteArr(long time) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(time);
+        return buffer.array();
     }
 
     private class StartWearableActivityTask extends Thread {

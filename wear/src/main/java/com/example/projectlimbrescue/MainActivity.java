@@ -35,6 +35,7 @@ import org.json.JSONTokener;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -119,7 +120,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
                 // sendSensorData(serializeSensorData(JSONObject x))
             } else {
                 timer.start();
-                startTime = System.nanoTime();
+                startTime = bytesToLong(messageEvent.getData());
 //                mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor), SensorManager.SENSOR_DELAY_FASTEST);
             }
 
@@ -159,6 +160,13 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
                         Log.d(TAG, "Sending data was successful: " + dataItem);
                     }
                 });
+    }
+
+    private long bytesToLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes);
+        buffer.flip();
+        return buffer.getLong();
     }
 
     @Override

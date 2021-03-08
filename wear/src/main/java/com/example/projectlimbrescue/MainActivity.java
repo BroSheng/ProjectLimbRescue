@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.JsonReader;
 import android.util.Log;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -52,13 +53,13 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
     private SensorManager mSensorManager;
     private final int ppgSensor = 0;
     private long startTime;
-    private TextView text;
+    private Chronometer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        text = findViewById(R.id.text);
+        timer = findViewById(R.id.timer);
 //        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 //
 //        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
@@ -113,11 +114,11 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
         if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
             if (isLogging) {
+                timer.stop();
                 //TODO: Take reading information, convert to JSONObject
                 // sendSensorData(serializeSensorData(JSONObject x))
             } else {
-                String t = "Taking Reading";
-                text.setText(t);
+                timer.start();
                 startTime = System.nanoTime();
 //                mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor), SensorManager.SENSOR_DELAY_FASTEST);
             }

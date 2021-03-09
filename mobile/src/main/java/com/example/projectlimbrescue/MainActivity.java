@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.shared.ReadingSession;
 import com.example.shared.SensorReading;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
@@ -27,9 +28,13 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -39,9 +44,12 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     private Button mSendStartMessageBtn;
     private TextView mTextView;
-    private static final String START_ACTIVITY_PATH = "/start-activity";
 
-    private final LinkedList<SensorReading> readings = new LinkedList<>();
+    private static final String START_ACTIVITY_PATH = "/start-activity";
+    private static final String SENSOR_PATH = "/sensor";
+    private static final String SESSION_KEY = "session";
+
+    private ReadingSession readingSession;
 
 
     @Override
@@ -62,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         Wearable.getMessageClient(this).addListener(this);
         Wearable.getCapabilityClient(this)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE);
-    }//.
+    }
 
     @Override
     protected void onPause() {
@@ -84,22 +92,21 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                 DataItem dataItem = event.getDataItem();
                 Uri uri = dataItem.getUri();
                 String path = uri.getPath();
-                if (path.compareTo("/sensor") == 0) {
+
+                if (path.compareTo(SENSOR_PATH) == 0) {
                     DataMapItem item = DataMapItem.fromDataItem(dataItem);
                     DataMap dm = item.getDataMap();
-                    long elapsedTime = dm.getLong("elapsedtime") / 1000;
-                    String readTime = "Took " + elapsedTime + " second reading";
-                    mTextView.setText(readTime);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(dm.getByteArray(SESSION_KEY));
+                    try {
+                        ObjectInput in = new ObjectInputStream(bis);
+                        readingSession = (ReadingSession) in.readObject();
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    // TODO: Add reading session to database
                 }
             }
-//            ByteArrayInputStream bis = new ByteArrayInputStream(event.getDataItem().getData());
-//            try {
-//                ObjectInput in = new ObjectInputStream(bis);
-//                readings = (LinkedList<Reading>) in.readObject();
-//                setText();
-//            } catch (IOException | ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
+
 
         }
     }
@@ -117,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     public void onStartWearableActivityClick(View view) {
         Log.d(TAG, "Generating RPC");
 
-        new StartWearableActivityTask().run();
+        new StartWearableActivityTask().start();
         String stop = "Stop";
         mSendStartMessageBtn.setText(stop);
         mTextView.setText("");
@@ -125,7 +132,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     @WorkerThread
     private void sendStartActivityMessage(String node) {
-        Task<Integer> sendMessageTask = Wearable.getMessageClient(this).sendMessage(node, START_ACTIVITY_PATH, new byte[0]);
+        Task<Integer> sendMessageTask = Wearable.getMessageClient(this)
+                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(System.nanoTime()));
 
         try {
             // Block on a task and get the result synchronously (because this is on a background
@@ -167,23 +175,15 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         return results;
     }
 
-    private void setText() {
-        if (readings == null) {
-            Log.e(TAG, "No readings available");
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for (SensorReading reading : readings) {
-            String r = reading.value + " " + reading.timestamp + "\n";
-            sb.append(r);
-        }
-        mTextView.setText(sb);
-    }
-
     private void setupViews() {
         mSendStartMessageBtn = findViewById(R.id.start_activity);
         mTextView = findViewById(R.id.textView);
+    }
+
+    private byte[] longToByteArr(long time) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(time);
+        return buffer.array();
     }
 
     private class StartWearableActivityTask extends Thread {

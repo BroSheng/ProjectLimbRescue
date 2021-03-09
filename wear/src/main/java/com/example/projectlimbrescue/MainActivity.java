@@ -7,11 +7,14 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
+import android.util.JsonReader;
 import android.util.Log;
+import android.widget.Chronometer;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.example.shared.ReadingSession;
 import com.example.shared.SensorReading;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -26,6 +29,13 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.LinkedList;
 
@@ -38,20 +48,19 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
-    private static final String PPG_KEY = "ppg";
+    private static final String SESSION_KEY = "session";
 
     private boolean isLogging = false;
     private SensorManager mSensorManager;
     private final int ppgSensor = 0;
-    private final LinkedList<SensorReading> readingQueue = new LinkedList<>();
     private long startTime;
-    private TextView text;
+    private Chronometer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        text = findViewById(R.id.text);
+        timer = findViewById(R.id.timer);
 //        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 //
 //        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
@@ -105,30 +114,13 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         + messageEvent.getPath());
 
         if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
-            if(isLogging) {
-                String x = "Done";
-                text.setText(x);
-                sendMockData(System.currentTimeMillis() - startTime);
-//                mSensorManager.unregisterListener(this);
-//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                ObjectOutputStream oos = null;
-//                try {
-//                    oos = new ObjectOutputStream(bos);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                try {
-//                    oos.writeObject(readingQueue);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                byte[] serializedSensorData = bos.toByteArray();
-//                sendSensorData(serializedSensorData);
-//                readingQueue.clear();
+            if (isLogging) {
+                timer.stop();
+                //TODO: Take reading information, convert to JSONObject
+                // sendSensorData(serializeSensorData(JSONObject x))
             } else {
-                String t = "Taking Reading";
-                text.setText(t);
-                startTime = System.currentTimeMillis();
+                timer.start();
+                startTime = bytesToLong(messageEvent.getData());
 //                mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor), SensorManager.SENSOR_DELAY_FASTEST);
             }
 
@@ -136,9 +128,25 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         }
     }
 
-    private void sendMockData(long data) {
+    private byte[] serializeSensorData(ReadingSession readingSession) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = null;
+        try {
+            oos = new ObjectOutputStream(bos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            oos.writeObject(readingSession);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bos.toByteArray();
+    }
+
+    private void sendSensorData(byte[] serializedReadingSession) {
         PutDataMapRequest dataMap = PutDataMapRequest.create(SENSOR_PATH);
-        dataMap.getDataMap().putLong("elapsedtime", data);
+        dataMap.getDataMap().putByteArray(SESSION_KEY, serializedReadingSession);
         dataMap.getDataMap().putLong("time", new Date().getTime());
 
         PutDataRequest putDataRequest = dataMap.asPutDataRequest();
@@ -154,29 +162,16 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
                 });
     }
 
-    private void sendSensorData(byte[] serializedSensorData) {
-        PutDataMapRequest dataMap = PutDataMapRequest.create(SENSOR_PATH);
-        dataMap.getDataMap().putByteArray(PPG_KEY, serializedSensorData);
-        dataMap.getDataMap().putLong("time", new Date().getTime());
-
-        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-        putDataRequest.setUrgent();
-
-        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
-        dataItemTask.addOnSuccessListener(
-                new OnSuccessListener<DataItem>() {
-                    @Override
-                    public void onSuccess(DataItem dataItem) {
-                        Log.d(TAG, "Sending data was successful: " + dataItem);
-                    }
-                });
+    private long bytesToLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes);
+        buffer.flip();
+        return buffer.getLong();
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if(event.sensor.getType() == ppgSensor) {
-            readingQueue.add(new SensorReading(event.timestamp, event.values[0]));
-        }
+        //TODO: Receive sensor values and convert to JSON
     }
 
     @Override

@@ -160,6 +160,9 @@ public class JsonToDb {
                 reading.sensorId = sensorId;
                 reading.time = jsonReading.getLong("time");
                 reading.value = jsonReading.getDouble("value");
+                reading.limb = limb;
+
+                readingDao.insert(reading);
             }
         }
     }

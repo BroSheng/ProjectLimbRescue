@@ -1,12 +1,11 @@
 package com.example.projectlimbrescue;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.fragment.app.Fragment;
 
 import com.androidplot.xy.CatmullRomInterpolator;
 import com.androidplot.xy.LineAndPointFormatter;
@@ -15,12 +14,9 @@ import com.androidplot.xy.SimpleXYSeries;
 import com.androidplot.xy.XYGraphWidget;
 import com.androidplot.xy.XYPlot;
 import com.androidplot.xy.XYSeries;
-import com.example.myapplication.R;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,6 +30,7 @@ public class GraphFragment extends Fragment {
     private static final String XVALUES = "xvalues";
     private static final String YVALUES = "yvalues";
 
+    // x values are float since we convert the time in nanoseconds to time since first reading
     private List<Double> mXVals;
     private List<Double> mYVals;
     private XYPlot mPlot;
@@ -65,19 +62,19 @@ public class GraphFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             long[] x;
-            double[] y;
+            float[] y;
             mXVals = new ArrayList<>();
             mYVals = new ArrayList<>();
 
             x = getArguments().getLongArray(XVALUES);
-            y = getArguments().getDoubleArray(YVALUES);
+            y = getArguments().getFloatArray(YVALUES);
 
             // convert arrays to ArrayList (I can't find a better way of doing this)
             // also have x start from 0
             long start = x[0];
             for (int i = 0; i < x.length; i++) {
                 mXVals.add((x[i] - start) / 1000000000.0);
-                mYVals.add(y[i]);
+                mYVals.add((double) y[i]);
             }
 
         }

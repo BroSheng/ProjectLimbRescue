@@ -22,8 +22,6 @@ import com.example.projectlimbrescue.db.sensor.SensorDao;
 import com.example.projectlimbrescue.db.sensor.SensorDesc;
 import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
-import com.example.projectlimbrescue.db.session.SessionMeasuresSensor;
-import com.example.projectlimbrescue.db.session.SessionMeasuresSensorDao;
 import com.example.projectlimbrescue.db.session.SessionReadsFromDevice;
 import com.example.projectlimbrescue.db.session.SessionReadsFromDeviceDao;
 
@@ -31,10 +29,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.*;
 
 import java.sql.Timestamp;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
 
 /*
 Test class for DeviceDao.

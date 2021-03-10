@@ -21,23 +21,30 @@ import com.example.projectlimbrescue.db.session.SessionReadsFromDeviceDao;
 
 @Database(
         entities = {
-            Device.class,
-            DeviceContainsSensor.class,
-            Reading.class,
-            Sensor.class,
-            Session.class,
-            SessionMeasuresSensor.class,
-            SessionReadsFromDevice.class
+                Device.class,
+                DeviceContainsSensor.class,
+                Reading.class,
+                Sensor.class,
+                Session.class,
+                SessionMeasuresSensor.class,
+                SessionReadsFromDevice.class
         },
-        version = 1
+        version = 1,
+        exportSchema = false
 )
 @TypeConverters(Converters.class)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract DeviceDao deviceDao();
+
     public abstract DeviceContainsSensorDao deviceContainsSensorDao();
+
     public abstract ReadingDao readingDao();
+
     public abstract SensorDao sensorDao();
+
     public abstract SessionDao sessionDao();
+
     public abstract SessionMeasuresSensorDao sessionMeasuresSensorDao();
+
     public abstract SessionReadsFromDeviceDao sessionReadsFromDeviceDao();
 }

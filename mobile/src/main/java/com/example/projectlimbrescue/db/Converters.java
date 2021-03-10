@@ -18,6 +18,7 @@ public class Converters {
     public static long fromTimestamp(Timestamp ts) {
         return ts.getTime();
     }
+
     @TypeConverter
     public static Timestamp toTimestamp(long ms) {
         return new Timestamp(ms);
@@ -28,24 +29,29 @@ public class Converters {
     public static int fromDeviceDesc(DeviceDesc desc) {
         return desc.ordinal();
     }
+
     @TypeConverter
     public static DeviceDesc toDeviceDesc(int val) {
         return (DeviceDesc.values()[val]);
     }
+
     // ReadingLimb
     @TypeConverter
     public static int fromReadingLimb(ReadingLimb limb) {
         return limb.ordinal();
     }
+
     @TypeConverter
     public static ReadingLimb toReadingLimb(int val) {
         return (ReadingLimb.values()[val]);
     }
+
     // SensorDesc
     @TypeConverter
     public static int fromSensorDesc(SensorDesc desc) {
         return desc.ordinal();
     }
+
     @TypeConverter
     public static SensorDesc toSensorDesc(int val) {
         return (SensorDesc.values()[val]);

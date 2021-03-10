@@ -6,11 +6,6 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
-import com.example.projectlimbrescue.db.device.Device;
-import com.example.projectlimbrescue.db.device.DeviceWithReadings;
-import com.example.projectlimbrescue.db.device.DeviceWithSensors;
-import com.example.projectlimbrescue.db.device.DeviceWithSessions;
-
 import java.util.List;
 
 /*
@@ -22,12 +17,15 @@ public interface SensorDao {
     // Simple "placeholder" methods for now; add more in as functionality or testing requires
     @Query("SELECT * FROM Sensor")
     List<Sensor> getSensors();
+
     @Transaction
     @Query("SELECT * FROM Sensor")
     List<SensorWithDevices> getSensorsWithDevices();
+
     @Transaction
     @Query("SELECT * FROM Sensor")
     List<SensorWithReadings> getSensorsWithReadings();
+
     @Transaction
     @Query("SELECT * FROM Sensor")
     List<SensorWithSessions> getSensorWithSessions();

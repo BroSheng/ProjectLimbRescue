@@ -6,11 +6,9 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.session.Session;
-import com.example.projectlimbrescue.db.device.Device;
-
-import java.sql.Timestamp;
 
 /*
 A reading is a single instance of raw data collected from a type of sensor,
@@ -18,30 +16,30 @@ on a particular device, about a given limb, during a single session.
 It numerically represents some output recorded by the sensor.
  */
 
-@Entity ( foreignKeys = {
-    @ForeignKey(
-        entity = Session.class,
-        parentColumns = "session_id",
-        childColumns = "session_id",
-        onDelete = ForeignKey.CASCADE
-    ),
-    @ForeignKey (
-            entity = Device.class,
-            parentColumns = "device_id",
-            childColumns = "device_id",
-            onDelete = ForeignKey.CASCADE
-    ),
-    @ForeignKey (
-            entity = Sensor.class,
-            parentColumns = "sensor_id",
-            childColumns = "sensor_id",
-            onDelete = ForeignKey.CASCADE
-    )},
-    indices = {
-        @Index("session_id"),
-        @Index("device_id"),
-        @Index("sensor_id")
-    })
+@Entity(foreignKeys = {
+        @ForeignKey(
+                entity = Session.class,
+                parentColumns = "session_id",
+                childColumns = "session_id",
+                onDelete = ForeignKey.CASCADE
+        ),
+        @ForeignKey(
+                entity = Device.class,
+                parentColumns = "device_id",
+                childColumns = "device_id",
+                onDelete = ForeignKey.CASCADE
+        ),
+        @ForeignKey(
+                entity = Sensor.class,
+                parentColumns = "sensor_id",
+                childColumns = "sensor_id",
+                onDelete = ForeignKey.CASCADE
+        )},
+        indices = {
+                @Index("session_id"),
+                @Index("device_id"),
+                @Index("sensor_id")
+        })
 public class Reading {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "reading_id")

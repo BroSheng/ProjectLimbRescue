@@ -9,7 +9,7 @@ import com.example.projectlimbrescue.db.reading.Reading;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.session.Session;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class DbTestUtils {
     public static void assertDeviceEquals(Device expected, Device actual) {

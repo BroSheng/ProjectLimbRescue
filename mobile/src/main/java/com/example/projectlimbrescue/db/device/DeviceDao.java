@@ -17,18 +17,22 @@ public interface DeviceDao {
     // Simple "placeholder" methods for now; add more in as functionality or testing requires
     @Query("SELECT * FROM Device")
     List<Device> getDevices();
+
     @Transaction
     @Query("SELECT * FROM Device")
     List<DeviceWithReadings> getDevicesWithReadings();
+
     @Transaction
     @Query("SELECT * FROM Device")
     List<DeviceWithSensors> getDevicesWithSensors();
+
     @Transaction
     @Query("SELECT * FROM Device")
     List<DeviceWithSessions> getDevicesWithSessions();
 
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<Device> getDevicesByIds(int[] ids);
+
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
     List<DeviceWithReadings> getDevicesWithReadingsByIds(long[] ids);

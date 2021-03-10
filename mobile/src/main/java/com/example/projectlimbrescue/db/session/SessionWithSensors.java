@@ -16,9 +16,9 @@ public class SessionWithSensors {
     @Embedded
     public Session session;
     @Relation(
-        parentColumn = "session_id",
-        entityColumn = "sensor_id",
-        associateBy = @Junction(SessionMeasuresSensor.class)
+            parentColumn = "session_id",
+            entityColumn = "sensor_id",
+            associateBy = @Junction(SessionMeasuresSensor.class)
     )
     public List<Sensor> sensors;
 }

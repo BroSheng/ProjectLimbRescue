@@ -67,7 +67,7 @@ public class SensorDaoTest {
     }
 
     /*
-    Standard tests -- insert, get by id, insert and remove
+    Standard tests -- insert, get by id/desc, insert and remove
      */
 
     @Test
@@ -89,7 +89,19 @@ public class SensorDaoTest {
         sensor.desc = SensorDesc.PPG;
 
         sensorDao.insert(sensor);
-        List<Sensor> sensors = sensorDao.getSensorsByIds(new int[]{123});
+        List<Sensor> sensors = sensorDao.getSensorsByIds(new long[]{123});
+
+        DbTestUtils.assertSensorEquals(sensor, sensors.get(0));
+    }
+
+    @Test
+    public void insertAndGetSensorByDesc() throws Exception {
+        Sensor sensor = new Sensor();
+        sensor.sensorId = 123;
+        sensor.desc = SensorDesc.PPG;
+
+        sensorDao.insert(sensor);
+        List<Sensor> sensors = sensorDao.getSensorsByDesc(SensorDesc.PPG);
 
         DbTestUtils.assertSensorEquals(sensor, sensors.get(0));
     }
@@ -105,7 +117,7 @@ public class SensorDaoTest {
         sensor2.desc = SensorDesc.PPG;
 
         sensorDao.insert(sensor1, sensor2);
-        List<Sensor> sensors = sensorDao.getSensorsByIds(new int[]{123, 456});
+        List<Sensor> sensors = sensorDao.getSensorsByIds(new long[]{123, 456});
 
         DbTestUtils.assertSensorEquals(sensor1, sensors.get(0));
         DbTestUtils.assertSensorEquals(sensor2, sensors.get(1));
@@ -172,7 +184,7 @@ public class SensorDaoTest {
         deviceContainsSensor.sensorId = sensor.sensorId;
         deviceContainsSensorDao.insert(deviceContainsSensor);
 
-        List<SensorWithDevices> sensorWithDevices = sensorDao.getSensorsWithDevicesByIds(new int[]{123});
+        List<SensorWithDevices> sensorWithDevices = sensorDao.getSensorsWithDevicesByIds(new long[]{123});
         Sensor foundSensor = sensorWithDevices.get(0).sensor;
         List<Device> foundDevices = sensorWithDevices.get(0).devices;
 
@@ -206,7 +218,7 @@ public class SensorDaoTest {
         deviceContainsSensor2.sensorId = sensor2.sensorId;
         deviceContainsSensorDao.insert(deviceContainsSensor1, deviceContainsSensor2);
 
-        List<SensorWithDevices> sensorsWithDevices = sensorDao.getSensorsWithDevicesByIds(new int[]{123, 456});
+        List<SensorWithDevices> sensorsWithDevices = sensorDao.getSensorsWithDevicesByIds(new long[]{123, 456});
         Sensor foundSensor1 = sensorsWithDevices.get(0).sensor;
         Sensor foundSensor2 = sensorsWithDevices.get(1).sensor;
         List<Device> foundDevices1 = sensorsWithDevices.get(0).devices;
@@ -245,7 +257,7 @@ public class SensorDaoTest {
         device2ContainsSensor.sensorId = sensor.sensorId;
         deviceContainsSensorDao.insert(device1ContainsSensor, device2ContainsSensor);
 
-        List<SensorWithDevices> sensorWithDevices = sensorDao.getSensorsWithDevicesByIds(new int[]{123, 456});
+        List<SensorWithDevices> sensorWithDevices = sensorDao.getSensorsWithDevicesByIds(new long[]{123, 456});
         Sensor foundSensor = sensorWithDevices.get(0).sensor;
         List<Device> foundDevices = sensorWithDevices.get(0).devices;
 
@@ -331,7 +343,7 @@ public class SensorDaoTest {
         readingDao.insert(reading);
 
         // test validity
-        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new int[]{123});
+        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new long[]{123});
         Sensor foundSensor = sensorsWithReadings.get(0).sensor;
         List<Reading> foundReadings = sensorsWithReadings.get(0).readings;
 
@@ -384,7 +396,7 @@ public class SensorDaoTest {
         readingDao.insert(reading1, reading2);
 
         // test validity
-        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new int[]{123, 456});
+        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new long[]{123, 456});
         Sensor foundSensor1 = sensorsWithReadings.get(0).sensor;
         Sensor foundSensor2 = sensorsWithReadings.get(1).sensor;
         List<Reading> foundReadings1 = sensorsWithReadings.get(0).readings;
@@ -437,7 +449,7 @@ public class SensorDaoTest {
         readingDao.insert(reading1, reading2);
 
         // test validity
-        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new int[]{123});
+        List<SensorWithReadings> sensorsWithReadings = sensorDao.getSensorsWithReadingsByIds(new long[]{123});
         Sensor foundSensor = sensorsWithReadings.get(0).sensor;
         List<Reading> foundReadings = sensorsWithReadings.get(0).readings;
 
@@ -496,7 +508,7 @@ public class SensorDaoTest {
         sessionMeasuresSensor.sensorId = sensor.sensorId;
         sessionMeasuresSensorDao.insert(sessionMeasuresSensor);
 
-        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new int[]{123});
+        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new long[]{123});
         Sensor foundSensor = sensorsWithSessions.get(0).sensor;
         List<Session> foundSessions = sensorsWithSessions.get(0).sessions;
 
@@ -531,7 +543,7 @@ public class SensorDaoTest {
         sessionMeasuresSensor2.sensorId = sensor2.sensorId;
         sessionMeasuresSensorDao.insert(sessionMeasuresSensor1, sessionMeasuresSensor2);
 
-        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new int[]{123, 456});
+        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new long[]{123, 456});
         Sensor foundSensor1 = sensorsWithSessions.get(0).sensor;
         Sensor foundSensor2 = sensorsWithSessions.get(1).sensor;
         List<Session> foundSessions1 = sensorsWithSessions.get(0).sessions;
@@ -572,7 +584,7 @@ public class SensorDaoTest {
         session2MeasuresSensor.sensorId = sensor.sensorId;
         sessionMeasuresSensorDao.insert(session1MeasuresSensor, session2MeasuresSensor);
 
-        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new int[]{123});
+        List<SensorWithSessions> sensorsWithSessions = sensorDao.getSensorsWithSessionsByIds(new long[]{123});
         Sensor foundSensor = sensorsWithSessions.get(0).sensor;
         List<Session> foundSessions = sensorsWithSessions.get(0).sessions;
 

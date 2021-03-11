@@ -67,7 +67,7 @@ public class DeviceDaoTest {
     }
 
     /*
-    Standard tests -- insert, get by id, insert and remove
+    Standard tests -- insert, get by id/desc, insert and remove
      */
 
     @Test
@@ -78,6 +78,18 @@ public class DeviceDaoTest {
 
         deviceDao.insert(device);
         List<Device> devices = deviceDao.getDevices();
+
+        DbTestUtils.assertDeviceEquals(device, devices.get(0));
+    }
+
+    @Test
+    public void insertAndGetDeviceByDesc() throws Exception {
+        Device device = new Device();
+        device.deviceId = 123;
+        device.desc = DeviceDesc.FOSSIL_GEN_5;
+
+        deviceDao.insert(device);
+        List<Device> devices = deviceDao.getDevicesByDesc(DeviceDesc.FOSSIL_GEN_5);
 
         DbTestUtils.assertDeviceEquals(device, devices.get(0));
     }
@@ -203,7 +215,7 @@ public class DeviceDaoTest {
         readingDao.insert(reading);
 
         // test validity
-        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new int[]{123});
+        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new long[]{123});
         Device foundDevice = devicesWithReadings.get(0).device;
         List<Reading> foundReadings = devicesWithReadings.get(0).readings;
 
@@ -259,7 +271,7 @@ public class DeviceDaoTest {
         readingDao.insert(reading2);
 
         // test validity
-        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new int[]{123, 456});
+        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new long[]{123, 456});
 
         Device foundDevice1 = devicesWithReadings.get(0).device;
         List<Reading> foundReadings1 = devicesWithReadings.get(0).readings;
@@ -315,7 +327,7 @@ public class DeviceDaoTest {
         readingDao.insert(reading2);
 
         // test validity
-        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new int[]{123});
+        List<DeviceWithReadings> devicesWithReadings = deviceDao.getDevicesWithReadingsByIds(new long[]{123});
 
         Device foundDevice = devicesWithReadings.get(0).device;
         List<Reading> foundReadings = devicesWithReadings.get(0).readings;
@@ -373,7 +385,7 @@ public class DeviceDaoTest {
         deviceContainsSensor.sensorId = sensor.sensorId;
         deviceContainsSensorDao.insert(deviceContainsSensor);
 
-        List<DeviceWithSensors> deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new int[]{123});
+        List<DeviceWithSensors> deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{123});
         Device foundDevice = deviceWithSensors.get(0).device;
         List<Sensor> foundSensors = deviceWithSensors.get(0).sensors;
 
@@ -408,7 +420,7 @@ public class DeviceDaoTest {
 
         deviceContainsSensorDao.insert(device1ContainsSensor, device2ContainsSensor);
 
-        List<DeviceWithSensors> devicesWithSensors = deviceDao.getDevicesWithSensorsByIds(new int[]{123, 456});
+        List<DeviceWithSensors> devicesWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{123, 456});
         Device foundDevice1 = devicesWithSensors.get(0).device;
         List<Sensor> foundSensors1 = devicesWithSensors.get(0).sensors;
         Device foundDevice2 = devicesWithSensors.get(1).device;
@@ -446,7 +458,7 @@ public class DeviceDaoTest {
 
         deviceContainsSensorDao.insert(deviceContainsSensor1, deviceContainsSensor2);
 
-        List<DeviceWithSensors> deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new int[]{123});
+        List<DeviceWithSensors> deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{123});
         Device foundDevice = deviceWithSensors.get(0).device;
         List<Sensor> foundSensors = deviceWithSensors.get(0).sensors;
 
@@ -505,7 +517,7 @@ public class DeviceDaoTest {
         sessionReadsFromDevice.sessionId = session.sessionId;
         sessionReadsFromDeviceDao.insert(sessionReadsFromDevice);
 
-        List<DeviceWithSessions> deviceWithSessions = deviceDao.getDevicesWithSessionsByIds(new int[]{123});
+        List<DeviceWithSessions> deviceWithSessions = deviceDao.getDevicesWithSessionsByIds(new long[]{123});
         Device foundDevice = deviceWithSessions.get(0).device;
         List<Session> foundSessions = deviceWithSessions.get(0).sessions;
 
@@ -540,7 +552,7 @@ public class DeviceDaoTest {
 
         sessionReadsFromDeviceDao.insert(sessionReadsFromDevice1, sessionReadsFromDevice2);
 
-        List<DeviceWithSessions> devicesWithSessions = deviceDao.getDevicesWithSessionsByIds(new int[]{123, 456});
+        List<DeviceWithSessions> devicesWithSessions = deviceDao.getDevicesWithSessionsByIds(new long[]{123, 456});
         Device foundDevice1 = devicesWithSessions.get(0).device;
         List<Session> foundSessions1 = devicesWithSessions.get(0).sessions;
         Device foundDevice2 = devicesWithSessions.get(1).device;
@@ -580,7 +592,7 @@ public class DeviceDaoTest {
 
         sessionReadsFromDeviceDao.insert(session1ReadsFromDevice, session2ReadsFromDevice);
 
-        List<DeviceWithSessions> deviceWithSessions = deviceDao.getDevicesWithSessionsByIds(new int[]{123});
+        List<DeviceWithSessions> deviceWithSessions = deviceDao.getDevicesWithSessionsByIds(new long[]{123});
         Device foundDevice = deviceWithSessions.get(0).device;
         List<Session> foundSessions = deviceWithSessions.get(0).sessions;
 

@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.reading.Reading;
-import com.example.projectlimbrescue.db.reading.ReadingLimb;
+import com.example.shared.ReadingLimb;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 

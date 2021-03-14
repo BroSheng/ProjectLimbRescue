@@ -1,4 +1,4 @@
-package com.example.projectlimbrescue.db.reading;
+package com.example.shared;
 
 public enum ReadingLimb {
     LEFT_ARM,

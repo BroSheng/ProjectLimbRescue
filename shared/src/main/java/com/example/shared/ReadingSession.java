@@ -32,10 +32,10 @@ import java.util.List;
  */
 public class ReadingSession {
     public List<SensorReadingList> sensors;
-    public Limb limb;
+    public ReadingLimb limb;
     public DeviceDesc desc;
 
-    public ReadingSession(DeviceDesc device, Limb limb) {
+    public ReadingSession(DeviceDesc device, ReadingLimb limb) {
         this.sensors = new ArrayList<>();
         this.limb = limb;
         this.desc = device;

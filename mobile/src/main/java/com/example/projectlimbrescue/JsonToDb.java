@@ -39,6 +39,7 @@ import com.example.projectlimbrescue.db.reading.*;
 import com.example.projectlimbrescue.db.sensor.*;
 import com.example.projectlimbrescue.db.session.*;
 import com.example.shared.DeviceDesc;
+import com.example.shared.ReadingLimb;
 import com.example.shared.SensorDesc;
 
 import org.json.*;

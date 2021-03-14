@@ -19,7 +19,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.example.shared.DeviceDesc;
-import com.example.shared.Limb;
+import com.example.shared.ReadingLimb;
 import com.example.shared.ReadingSession;
 import com.example.shared.SensorDesc;
 import com.example.shared.SensorReadingList;
@@ -65,7 +65,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
     private long calibrationOffset = 0L;
 
-    private Limb limb = Limb.LEFT_ARM;
+    private ReadingLimb limb = ReadingLimb.LEFT_ARM;
 
     private TextView status;
 
@@ -225,10 +225,10 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         switch(adapterView.getItemAtPosition(pos).toString()) {
             case "Left Arm":
-                this.limb = Limb.LEFT_ARM;
+                this.limb = ReadingLimb.LEFT_ARM;
                 break;
             case "Right Arm":
-                this.limb = Limb.RIGHT_ARM;
+                this.limb = ReadingLimb.RIGHT_ARM;
                 break;
         }
     }

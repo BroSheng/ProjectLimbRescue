@@ -16,7 +16,7 @@ import com.example.projectlimbrescue.db.device.DeviceWithSensors;
 import com.example.projectlimbrescue.db.device.DeviceWithSessions;
 import com.example.projectlimbrescue.db.reading.Reading;
 import com.example.projectlimbrescue.db.reading.ReadingDao;
-import com.example.projectlimbrescue.db.reading.ReadingLimb;
+import com.example.shared.ReadingLimb;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.sensor.SensorDao;
 import com.example.shared.SensorDesc;

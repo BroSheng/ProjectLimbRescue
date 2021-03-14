@@ -45,4 +45,6 @@ public class SensorReadingList extends JSONObject {
     public void addReading(SensorReading reading) {
         this.readings.put(reading);
     }
+
+    public void addReading(JSONObject reading) { this.readings.put(reading); }
 }

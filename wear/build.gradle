@@ -24,6 +24,7 @@ android {
 }
 
 dependencies {
+    implementation 'org.json:json:20201115'
     implementation 'com.google.android.support:wearable:2.8.1'
     implementation 'com.google.android.gms:play-services-wearable:17.0.0'
     implementation 'androidx.percentlayout:percentlayout:1.0.0'

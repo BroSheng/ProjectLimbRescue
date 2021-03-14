@@ -29,10 +29,13 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -49,16 +52,12 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
 
-    private ReadingSession readingSession;
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         setupViews();
-
 
     }
 
@@ -98,9 +97,20 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     DataMap dm = item.getDataMap();
                     ByteArrayInputStream bis = new ByteArrayInputStream(dm.getByteArray(SESSION_KEY));
                     try {
-                        ObjectInput in = new ObjectInputStream(bis);
-                        readingSession = (ReadingSession) in.readObject();
-                    } catch (IOException | ClassNotFoundException e) {
+//                        ObjectInput in = new ObjectInputStream(bis);
+//                        readingSession = (ReadingSession) in.readObject();
+
+                        // Convert bytestream to JSON string
+                        int n = bis.available();
+                        byte[] bytes = new byte[n];
+                        bis.read(bytes, 0, n);
+                        String jsonString = new String(bytes, StandardCharsets.UTF_8);
+
+                        FileWriter readingsLog = new FileWriter(getFilesDir() + "/log.json");
+                        readingsLog.write(jsonString);
+                        readingsLog.close();
+//                    } catch (IOException | ClassNotFoundException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                     // TODO: Add reading session to database
@@ -132,8 +142,10 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     @WorkerThread
     private void sendStartActivityMessage(String node) {
+        Instant now = Instant.now();
+        long nanoUtc = now.getEpochSecond() * 1000000000 + now.getNano();
         Task<Integer> sendMessageTask = Wearable.getMessageClient(this)
-                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(System.nanoTime()));
+                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(nanoUtc));
 
         try {
             // Block on a task and get the result synchronously (because this is on a background

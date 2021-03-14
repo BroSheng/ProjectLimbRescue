@@ -2,17 +2,21 @@ package com.example.projectlimbrescue;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
-import com.example.shared.ReadingSession;
-import com.example.shared.SensorReading;
+import com.example.projectlimbrescue.db.AppDatabase;
+import com.example.projectlimbrescue.db.session.Session;
+import com.example.projectlimbrescue.db.session.SessionDao;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.android.gms.wearable.CapabilityClient;
@@ -28,14 +32,15 @@ import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +57,12 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
 
+    private AppDatabase db;
+
+    private int nodesRequiredInSession = 0;
+    private final List<JSONObject> readingSessions = new ArrayList<>();
+    private long startTime = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
         setupViews();
 
+        db = Room.inMemoryDatabaseBuilder(getApplicationContext(), AppDatabase.class)
+                .allowMainThreadQueries().build();
     }
 
     @Override
@@ -96,24 +109,22 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     DataMapItem item = DataMapItem.fromDataItem(dataItem);
                     DataMap dm = item.getDataMap();
                     ByteArrayInputStream bis = new ByteArrayInputStream(dm.getByteArray(SESSION_KEY));
+
+                    // Convert bytestream to JSON string
+                    int n = bis.available();
+                    byte[] bytes = new byte[n];
+                    bis.read(bytes, 0, n);
+                    String jsonString = new String(bytes, StandardCharsets.UTF_8);
+
                     try {
-//                        ObjectInput in = new ObjectInputStream(bis);
-//                        readingSession = (ReadingSession) in.readObject();
-
-                        // Convert bytestream to JSON string
-                        int n = bis.available();
-                        byte[] bytes = new byte[n];
-                        bis.read(bytes, 0, n);
-                        String jsonString = new String(bytes, StandardCharsets.UTF_8);
-
-                        FileWriter readingsLog = new FileWriter(getFilesDir() + "/log.json");
-                        readingsLog.write(jsonString);
-                        readingsLog.close();
-//                    } catch (IOException | ClassNotFoundException e) {
-                    } catch (IOException e) {
+                        readingSessions.add(new JSONObject(jsonString));
+                    } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    // TODO: Add reading session to database
+
+                    if (readingSessions.size() >= nodesRequiredInSession) {
+                        new StoreReadingsTask().start();
+                    }
                 }
             }
 
@@ -143,9 +154,9 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     @WorkerThread
     private void sendStartActivityMessage(String node) {
         Instant now = Instant.now();
-        long nanoUtc = now.getEpochSecond() * 1000000000 + now.getNano();
+        this.startTime = now.getEpochSecond() * 1000000000 + now.getNano();
         Task<Integer> sendMessageTask = Wearable.getMessageClient(this)
-                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(nanoUtc));
+                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(this.startTime));
 
         try {
             // Block on a task and get the result synchronously (because this is on a background
@@ -199,13 +210,39 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     }
 
     private class StartWearableActivityTask extends Thread {
-
         @Override
         public void run() {
             Collection<String> nodes = getNodes();
             for (String node : nodes) {
                 sendStartActivityMessage(node);
             }
+            readingSessions.clear();
+            nodesRequiredInSession = nodes.size();
+        }
+    }
+
+    private class StoreReadingsTask extends Thread {
+        @Override
+        public void run() {
+            Looper.prepare();
+            SessionDao sessionAccess = db.sessionDao();
+
+            Session session = new Session();
+            Instant now = Instant.now();
+            long endTime = now.getEpochSecond() * 1000000000 + now.getNano();
+            session.startTime = new Timestamp(startTime);
+            session.endTime = new Timestamp(endTime);
+
+            long sessionId = sessionAccess.insert(session)[0];
+            for(JSONObject obj : readingSessions) {
+                try {
+                    JsonToDb.InsertJson(obj, sessionId, db);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Toast.makeText(getApplicationContext(), "Successfully added session", Toast.LENGTH_SHORT).show();
         }
     }
 }

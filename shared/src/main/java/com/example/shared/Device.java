@@ -8,16 +8,4 @@ public enum Device {
     FOSSIL_GEN_5,
     /** Wyze scale. */
     WYZE_SCALE;
-
-    @Override
-    public String toString() {
-        switch(this) {
-            case FOSSIL_GEN_5:
-                return "Fossil Gen 5";
-            case WYZE_SCALE:
-                return "Wyze Scale";
-            default:
-                return "Unknown";
-        }
-    }
 }

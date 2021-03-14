@@ -98,6 +98,7 @@ public class JsonToDb {
         for (Device device : sessionWithDevices.devices) {
             if (device.deviceId == deviceId) {
                 foundDevice = true;
+                break;
             }
         }
         if (!foundDevice) {
@@ -127,6 +128,7 @@ public class JsonToDb {
             for (Sensor sensor : deviceWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {
                     foundSensor = true;
+                    break;
                 }
             }
             if (!foundSensor) {
@@ -141,6 +143,7 @@ public class JsonToDb {
             for (Sensor sensor : sessionWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {
                     foundSensor = true;
+                    break;
                 }
             }
             if (!foundSensor) {

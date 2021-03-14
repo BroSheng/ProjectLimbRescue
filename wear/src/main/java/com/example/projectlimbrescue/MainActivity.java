@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.wearable.activity.WearableActivity;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -22,7 +21,6 @@ import androidx.annotation.NonNull;
 import com.example.shared.Device;
 import com.example.shared.Limb;
 import com.example.shared.ReadingSession;
-import com.example.shared.SensorReading;
 import com.example.shared.SensorReadingList;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -39,15 +37,10 @@ import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 
 /*
@@ -168,25 +161,12 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         // TODO: Programmatically get device and limb
         ReadingSession session = new ReadingSession(Device.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
-        sendSensorData(session.toString().getBytes());
+        JSONObject imm = session.toJson();
+        String imm2 = imm.toString();
+        byte[] imm3 = imm2.getBytes();
+        sendSensorData(imm3);
         status.setText("Waiting for phone...");
     }
-
-//    private byte[] serializeSensorData(ReadingSession readingSession) {
-//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//        ObjectOutputStream oos = null;
-//        try {
-//            oos = new ObjectOutputStream(bos);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        try {
-//            oos.writeObject(readingSession);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return bos.toByteArray();
-//    }
 
     private void sendSensorData(byte[] serializedReadingSession) {
         PutDataMapRequest dataMap = PutDataMapRequest.create(SENSOR_PATH);

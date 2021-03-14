@@ -17,6 +17,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.wear.ambient.AmbientModeSupport;
 
 import com.example.shared.DeviceDesc;
 import com.example.shared.ReadingLimb;
@@ -48,13 +50,19 @@ import java.util.List;
  * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some
  *  work.
  */
-public class MainActivity extends WearableActivity implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener, SensorEventListener, AdapterView.OnItemSelectedListener {
+public class MainActivity extends FragmentActivity implements
+        DataClient.OnDataChangedListener,
+        MessageClient.OnMessageReceivedListener,
+        CapabilityClient.OnCapabilityChangedListener,
+        SensorEventListener,
+        AdapterView.OnItemSelectedListener,
+        AmbientModeSupport.AmbientCallbackProvider {
     private static final String TAG = "MainActivity";
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
-    private static final int SENSOR_REFRESH_RATE = 30000;
+    private static final int SENSOR_REFRESH_RATE = 33333;
 
     private boolean isLogging = false;
     private SensorManager mSensorManager;
@@ -94,6 +102,8 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
+
+        AmbientModeSupport.AmbientController ambientController = AmbientModeSupport.attach(this);
     }
 
     @Override
@@ -202,12 +212,10 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
             }
             // Convert to a 5V analog reading.
             float reading = (event.values[0] / event.sensor.getMaximumRange()) * 5.0f;
-            Instant now = Instant.now();
-            long sensorTime = now.getEpochSecond() * 1000000000 + now.getNano() + ((event.timestamp - calibrationOffset) % 1000000);
-            long timestamp = sensorTime - startTime;
+            long timestamp = event.timestamp - this.calibrationOffset;
             JSONObject sensorReading = new JSONObject();
             try {
-                sensorReading.put("time", timestamp);
+                sensorReading.put("time", startTime + timestamp);
                 sensorReading.put("value", reading);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -236,5 +244,39 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+
+    @Override
+    public AmbientModeSupport.AmbientCallback getAmbientCallback() {
+        return new TimerAmbientCallback();
+    }
+
+    private class TimerAmbientCallback extends AmbientModeSupport.AmbientCallback {
+        @Override
+        public void onEnterAmbient(Bundle ambientDetails) {
+            super.onEnterAmbient(ambientDetails);
+
+            TextView status = (TextView) findViewById(R.id.status);
+            status.setVisibility(View.INVISIBLE);
+
+            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            limbChooser.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        public void onExitAmbient() {
+            super.onExitAmbient();
+
+            TextView status = (TextView) findViewById(R.id.status);
+            status.setVisibility(View.VISIBLE);
+
+            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            limbChooser.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onUpdateAmbient() {
+            // Update the content
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.projectlimbrescue;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Looper;
@@ -15,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
 import com.example.projectlimbrescue.db.AppDatabase;
+import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.google.android.gms.tasks.Task;
@@ -51,7 +53,6 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String TAG = "MainActivity";
 
     private Button mSendStartMessageBtn;
-    private TextView mTextView;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
@@ -70,8 +71,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
         setupViews();
 
-        db = Room.inMemoryDatabaseBuilder(getApplicationContext(), AppDatabase.class)
-                .allowMainThreadQueries().build();
+        db = DatabaseSingleton.getInstance(getApplicationContext());
     }
 
     @Override
@@ -148,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
         new StartWearableActivityTask().start();
         String stop = "Stop";
         mSendStartMessageBtn.setText(stop);
-        mTextView.setText("");
     }
 
     @WorkerThread
@@ -200,7 +199,6 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     private void setupViews() {
         mSendStartMessageBtn = findViewById(R.id.start_activity);
-        mTextView = findViewById(R.id.textView);
     }
 
     private byte[] longToByteArr(long time) {
@@ -242,7 +240,9 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                 }
             }
 
-            Toast.makeText(getApplicationContext(), "Successfully added session", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getBaseContext(), DataAnalysisActivity.class);
+            intent.putExtra("SESSION_ID", sessionId);
+            startActivity(intent);
         }
     }
 }

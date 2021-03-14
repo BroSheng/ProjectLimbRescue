@@ -10,15 +10,14 @@ import com.example.projectlimbrescue.JsonToDb;
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.device.DeviceDao;
-import com.example.projectlimbrescue.db.device.DeviceDesc;
+import com.example.shared.DeviceDesc;
 import com.example.projectlimbrescue.db.device.DeviceWithReadings;
 import com.example.projectlimbrescue.db.device.DeviceWithSensors;
-import com.example.projectlimbrescue.db.device.DeviceWithSessions;
 import com.example.projectlimbrescue.db.reading.Reading;
 import com.example.projectlimbrescue.db.reading.ReadingDao;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.sensor.SensorDao;
-import com.example.projectlimbrescue.db.sensor.SensorDesc;
+import com.example.shared.SensorDesc;
 import com.example.projectlimbrescue.db.sensor.SensorWithReadings;
 import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
@@ -32,10 +31,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 
 import static org.junit.Assert.assertEquals;

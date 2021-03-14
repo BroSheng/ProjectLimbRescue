@@ -1,4 +1,4 @@
-package com.example.projectlimbrescue.db.device;
+package com.example.shared;
 
 /*
 Enum for the 'desc' column of Device. Obviously not too necessary now,

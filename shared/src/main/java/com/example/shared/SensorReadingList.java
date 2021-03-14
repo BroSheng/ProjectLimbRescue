@@ -28,14 +28,14 @@ import java.util.List;
  */
 public class SensorReadingList {
     public List<JSONObject> readings;
-    public Sensor desc;
+    public SensorDesc desc;
 
     /**
      * Constructs a JSON object with the sensor type and readings array.
      *
      * @param type Type of sensor data.
      */
-    public SensorReadingList(Sensor type) {
+    public SensorReadingList(SensorDesc type) {
         this.readings = new ArrayList<>();
         this.desc = type;
     }
@@ -46,7 +46,7 @@ public class SensorReadingList {
         for(int i = 0; i < readings.length(); i++) {
             this.readings.add(readings.getJSONObject(i));
         }
-        this.desc = Sensor.valueOf(obj.getString("desc"));
+        this.desc = SensorDesc.valueOf(obj.getString("desc"));
     }
 
     public void addReading(JSONObject reading) {

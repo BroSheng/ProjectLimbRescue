@@ -33,22 +33,12 @@ import java.util.List;
 public class ReadingSession {
     public List<SensorReadingList> sensors;
     public Limb limb;
-    public Device desc;
+    public DeviceDesc desc;
 
-    public ReadingSession(Device device, Limb limb) {
+    public ReadingSession(DeviceDesc device, Limb limb) {
         this.sensors = new ArrayList<>();
         this.limb = limb;
         this.desc = device;
-    }
-
-    public ReadingSession(JSONObject obj) {
-        this.sensors = new ArrayList<>();
-        JSONArray sensors = obj.getJSONArray("sensors");
-        for(int i = 0; i < sensors.length(); i++) {
-            this.sensors.add(new SensorReadingList(sensors.getJSONObject(i)));
-        }
-        this.limb = Limb.valueOf(obj.getString("limb"));
-        this.desc = Device.valueOf(obj.getString("desc"));
     }
 
     /**
@@ -71,5 +61,10 @@ public class ReadingSession {
         obj.put("desc", this.desc);
         obj.put("limb", this.limb);
         return obj;
+    }
+
+    @Override
+    public String toString() {
+        return this.toJson().toString();
     }
 }

@@ -18,9 +18,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
-import com.example.shared.Device;
+import com.example.shared.DeviceDesc;
 import com.example.shared.Limb;
 import com.example.shared.ReadingSession;
+import com.example.shared.SensorDesc;
 import com.example.shared.SensorReadingList;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -149,7 +150,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         timer.start();
         this.startTime = startTime;
         this.calibrationOffset = -1L;
-        this.ppgReadings = new SensorReadingList(com.example.shared.Sensor.PPG);
+        this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
                                         SENSOR_REFRESH_RATE);
         status.setText("Recording");
@@ -159,7 +160,7 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
         timer.stop();
         status.setText("Sending data...");
         // TODO: Programmatically get device and limb
-        ReadingSession session = new ReadingSession(Device.FOSSIL_GEN_5, this.limb);
+        ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
         JSONObject imm = session.toJson();
         String imm2 = imm.toString();

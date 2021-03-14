@@ -38,10 +38,11 @@ import com.example.projectlimbrescue.db.device.*;
 import com.example.projectlimbrescue.db.reading.*;
 import com.example.projectlimbrescue.db.sensor.*;
 import com.example.projectlimbrescue.db.session.*;
+import com.example.shared.DeviceDesc;
+import com.example.shared.SensorDesc;
 
 import org.json.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class JsonToDb {

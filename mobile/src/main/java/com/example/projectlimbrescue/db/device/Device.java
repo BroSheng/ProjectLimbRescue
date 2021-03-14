@@ -4,6 +4,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.example.shared.DeviceDesc;
+
 /*
 A device is a type of smart technology, such as a smartwatch or smart scale,
 that contains one or more sensors. One ‘device’ entry refers to a type of device,

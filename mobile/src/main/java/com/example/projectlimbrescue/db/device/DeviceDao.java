@@ -6,6 +6,8 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
 
+import com.example.shared.DeviceDesc;
+
 import java.util.List;
 
 /*

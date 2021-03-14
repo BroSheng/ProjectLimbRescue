@@ -8,13 +8,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.device.DeviceDao;
-import com.example.projectlimbrescue.db.device.DeviceDesc;
+import com.example.shared.DeviceDesc;
 import com.example.projectlimbrescue.db.reading.Reading;
 import com.example.projectlimbrescue.db.reading.ReadingDao;
-import com.example.projectlimbrescue.db.reading.ReadingLimb;
+import com.example.shared.ReadingLimb;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.sensor.SensorDao;
-import com.example.projectlimbrescue.db.sensor.SensorDesc;
+import com.example.shared.SensorDesc;
 import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionMeasuresSensor;

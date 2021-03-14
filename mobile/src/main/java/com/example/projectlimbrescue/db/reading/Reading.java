@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey;
 import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.session.Session;
+import com.example.shared.ReadingLimb;
 
 /*
 A reading is a single instance of raw data collected from a type of sensor,

@@ -38,10 +38,12 @@ import com.example.projectlimbrescue.db.device.*;
 import com.example.projectlimbrescue.db.reading.*;
 import com.example.projectlimbrescue.db.sensor.*;
 import com.example.projectlimbrescue.db.session.*;
+import com.example.shared.DeviceDesc;
+import com.example.shared.ReadingLimb;
+import com.example.shared.SensorDesc;
 
 import org.json.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class JsonToDb {
@@ -98,6 +100,7 @@ public class JsonToDb {
         for (Device device : sessionWithDevices.devices) {
             if (device.deviceId == deviceId) {
                 foundDevice = true;
+                break;
             }
         }
         if (!foundDevice) {
@@ -127,6 +130,7 @@ public class JsonToDb {
             for (Sensor sensor : deviceWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {
                     foundSensor = true;
+                    break;
                 }
             }
             if (!foundSensor) {
@@ -141,6 +145,7 @@ public class JsonToDb {
             for (Sensor sensor : sessionWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {
                     foundSensor = true;
+                    break;
                 }
             }
             if (!foundSensor) {

@@ -3,6 +3,9 @@ package com.example.shared;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A JSON friendly representation of a session of readings. It has three fields: "desc" being a
  * description of the device the reading was taken from, "limb" being the limb right or left that
@@ -27,21 +30,15 @@ import org.json.JSONObject;
  *     }
  * </code>
  */
-public class ReadingSession extends JSONObject {
-    private final JSONArray sensors;
+public class ReadingSession {
+    public List<SensorReadingList> sensors;
+    public ReadingLimb limb;
+    public DeviceDesc desc;
 
-    /**
-     * Constructs the JSON object with the device name, limb, and array of sensors.
-     *
-     * @param device Device that the readings were taken from.
-     * @param limb Limb that the readings were taken from.
-     */
-    public ReadingSession(Device device, Limb limb) {
-        this.sensors = new JSONArray();
-
-        put("desc", device.toString());
-        put("limb", limb.toString());
-        put("sensors", this.sensors);
+    public ReadingSession(DeviceDesc device, ReadingLimb limb) {
+        this.sensors = new ArrayList<>();
+        this.limb = limb;
+        this.desc = device;
     }
 
     /**
@@ -50,6 +47,24 @@ public class ReadingSession extends JSONObject {
      * @param list Sensor reading list.
      */
     public void addSensor(SensorReadingList list) {
-        sensors.put(list);
+        sensors.add(list);
+    }
+
+    public JSONObject toJson() {
+        JSONArray sensors = new JSONArray();
+        for(int i = 0; i < this.sensors.size(); i++) {
+            sensors.put(this.sensors.get(i).toJson());
+        }
+
+        JSONObject obj = new JSONObject();
+        obj.put("sensors", sensors);
+        obj.put("desc", this.desc);
+        obj.put("limb", this.limb);
+        return obj;
+    }
+
+    @Override
+    public String toString() {
+        return this.toJson().toString();
     }
 }

@@ -6,9 +6,9 @@ Contains type converters for Timestamp and all enums used in database.
 
 import androidx.room.TypeConverter;
 
-import com.example.projectlimbrescue.db.device.DeviceDesc;
-import com.example.projectlimbrescue.db.reading.ReadingLimb;
-import com.example.projectlimbrescue.db.sensor.SensorDesc;
+import com.example.shared.DeviceDesc;
+import com.example.shared.ReadingLimb;
+import com.example.shared.SensorDesc;
 
 import java.sql.Timestamp;
 

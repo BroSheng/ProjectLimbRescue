@@ -3,6 +3,9 @@ package com.example.shared;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A JSON friendly representation of a grouping of readings from a sensor. Each sensor is identified
  * by the type of data is collects (i.e. "PPG", "Bioimpedance", etc.). JSON strings from sensors
@@ -23,26 +26,42 @@ import org.json.JSONObject;
  *     }
  * </code>
  */
-public class SensorReadingList extends JSONObject {
-    private final JSONArray readings;
+public class SensorReadingList {
+    public List<JSONObject> readings;
+    public SensorDesc desc;
 
     /**
      * Constructs a JSON object with the sensor type and readings array.
      *
      * @param type Type of sensor data.
      */
-    public SensorReadingList(Sensor type) {
-        this.readings = new JSONArray();
-        this.put("desc", type.toString());
-        this.put("readings", this.readings);
+    public SensorReadingList(SensorDesc type) {
+        this.readings = new ArrayList<>();
+        this.desc = type;
     }
 
-    /**
-     * Adds a sensor reading to the list.
-     *
-     * @param reading Reading to add to the list.
-     */
-    public void addReading(SensorReading reading) {
-        this.readings.put(reading);
+    public SensorReadingList(JSONObject obj) {
+        this.readings = new ArrayList<>();
+        JSONArray readings = obj.getJSONArray("readings");
+        for(int i = 0; i < readings.length(); i++) {
+            this.readings.add(readings.getJSONObject(i));
+        }
+        this.desc = SensorDesc.valueOf(obj.getString("desc"));
+    }
+
+    public void addReading(JSONObject reading) {
+        this.readings.add(reading);
+    }
+
+    public JSONObject toJson() {
+        JSONArray readings = new JSONArray();
+        for(int i = 0; i < this.readings.size(); i++) {
+            readings.put(this.readings.get(i));
+        }
+
+        JSONObject obj = new JSONObject();
+        obj.put("readings", readings);
+        obj.put("desc", this.desc);
+        return obj;
     }
 }

@@ -6,16 +6,25 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.wearable.activity.WearableActivity;
-import android.util.JsonReader;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
+import androidx.wear.ambient.AmbientModeSupport;
 
+import com.example.shared.DeviceDesc;
+import com.example.shared.ReadingLimb;
 import com.example.shared.ReadingSession;
-import com.example.shared.SensorReading;
+import com.example.shared.SensorDesc;
+import com.example.shared.SensorReadingList;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
@@ -29,50 +38,72 @@ import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.List;
 
 /*
  * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some
  *  work.
  */
-public class MainActivity extends WearableActivity implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener, SensorEventListener {
+public class MainActivity extends FragmentActivity implements
+        DataClient.OnDataChangedListener,
+        MessageClient.OnMessageReceivedListener,
+        CapabilityClient.OnCapabilityChangedListener,
+        SensorEventListener,
+        AdapterView.OnItemSelectedListener,
+        AmbientModeSupport.AmbientCallbackProvider {
     private static final String TAG = "MainActivity";
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
+    private static final int SENSOR_REFRESH_RATE = 33333;
 
     private boolean isLogging = false;
     private SensorManager mSensorManager;
-    private final int ppgSensor = 0;
-    private long startTime;
+    private int ppgSensor = 0;
+    private long startTime = 0L;
     private Chronometer timer;
+    private SensorReadingList ppgReadings = null;
+
+    private long calibrationOffset = 0L;
+
+    private ReadingLimb limb = ReadingLimb.LEFT_ARM;
+
+    private TextView status;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         timer = findViewById(R.id.timer);
-//        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-//
-//        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
-//        for (Sensor sensor : sensorList) {
-//            Log.d("List sensors", "Name: ${currentSensor.name} /Type_String: ${currentSensor.stringType} /Type_number: ${currentSensor.type}");
-//            if(sensor.getStringType() == "com.google.wear.sensor.ppg")
-//            {
-//                ppgSensor = sensor.getType();
-//                Log.d("Sensor", "Using of type ${currentSensor.type}");
-//                break;
-//            }
-//        }
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
+        for (Sensor sensor : sensorList) {
+            Log.d("List sensors", "Name: ${currentSensor.name} /Type_String: ${currentSensor.stringType} /Type_number: ${currentSensor.type}");
+            if(sensor.getStringType().equals("com.google.wear.sensor.ppg"))
+            {
+                ppgSensor = sensor.getType();
+                Log.d("Sensor", "Using of type ${currentSensor.type}");
+                break;
+            }
+        }
+
+        status = findViewById(R.id.status);
+
+        Spinner spinner = findViewById(R.id.limb_choice);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.limbs_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
+
+        AmbientModeSupport.AmbientController ambientController = AmbientModeSupport.attach(this);
     }
 
     @Override
@@ -115,33 +146,37 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
         if (messageEvent.getPath().equals(START_ACTIVITY_PATH)) {
             if (isLogging) {
-                timer.stop();
-                //TODO: Take reading information, convert to JSONObject
-                // sendSensorData(serializeSensorData(JSONObject x))
+                stopRecording();
             } else {
-                timer.start();
-                startTime = bytesToLong(messageEvent.getData());
-//                mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor), SensorManager.SENSOR_DELAY_FASTEST);
+                startRecording(bytesToLong(messageEvent.getData()));
             }
 
             isLogging = !isLogging;
         }
     }
 
-    private byte[] serializeSensorData(ReadingSession readingSession) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = null;
-        try {
-            oos = new ObjectOutputStream(bos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            oos.writeObject(readingSession);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return bos.toByteArray();
+    private void startRecording(long startTime) {
+        timer.setBase(SystemClock.elapsedRealtime());
+        timer.start();
+        this.startTime = startTime;
+        this.calibrationOffset = -1L;
+        this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
+                                        SENSOR_REFRESH_RATE);
+        status.setText("Recording");
+    }
+
+    private void stopRecording() {
+        timer.stop();
+        status.setText("Sending data...");
+        // TODO: Programmatically get device and limb
+        ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
+        session.addSensor(this.ppgReadings);
+        JSONObject imm = session.toJson();
+        String imm2 = imm.toString();
+        byte[] imm3 = imm2.getBytes();
+        sendSensorData(imm3);
+        status.setText("Waiting for phone...");
     }
 
     private void sendSensorData(byte[] serializedReadingSession) {
@@ -171,11 +206,77 @@ public class MainActivity extends WearableActivity implements DataClient.OnDataC
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        //TODO: Receive sensor values and convert to JSON
+        if(event.sensor.getType() == ppgSensor) {
+            if(this.calibrationOffset < 0) {
+                this.calibrationOffset = event.timestamp;
+            }
+            // Convert to a 5V analog reading.
+            float reading = (event.values[0] / event.sensor.getMaximumRange()) * 5.0f;
+            long timestamp = event.timestamp - this.calibrationOffset;
+            JSONObject sensorReading = new JSONObject();
+            try {
+                sensorReading.put("time", startTime + timestamp);
+                sensorReading.put("value", reading);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            this.ppgReadings.addReading(sensorReading);
+        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
+        switch(adapterView.getItemAtPosition(pos).toString()) {
+            case "Left Arm":
+                this.limb = ReadingLimb.LEFT_ARM;
+                break;
+            case "Right Arm":
+                this.limb = ReadingLimb.RIGHT_ARM;
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
+    }
+
+    @Override
+    public AmbientModeSupport.AmbientCallback getAmbientCallback() {
+        return new TimerAmbientCallback();
+    }
+
+    private class TimerAmbientCallback extends AmbientModeSupport.AmbientCallback {
+        @Override
+        public void onEnterAmbient(Bundle ambientDetails) {
+            super.onEnterAmbient(ambientDetails);
+
+            TextView status = (TextView) findViewById(R.id.status);
+            status.setVisibility(View.INVISIBLE);
+
+            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            limbChooser.setVisibility(View.INVISIBLE);
+        }
+
+        @Override
+        public void onExitAmbient() {
+            super.onExitAmbient();
+
+            TextView status = (TextView) findViewById(R.id.status);
+            status.setVisibility(View.VISIBLE);
+
+            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            limbChooser.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onUpdateAmbient() {
+            // Update the content
+        }
     }
 }

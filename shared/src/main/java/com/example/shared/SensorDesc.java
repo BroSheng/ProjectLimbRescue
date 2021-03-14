@@ -1,4 +1,4 @@
-package com.example.projectlimbrescue.db.sensor;
+package com.example.shared;
 
 /*
 Enum for the 'desc' column of Sensor. Obviously not too necessary now,

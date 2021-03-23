@@ -231,11 +231,18 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
             session.startTime = new Timestamp(startTime);
             session.endTime = new Timestamp(endTime);
 
-            long sessionId = sessionAccess.insert(session)[0];
+            long sessionId = 0;
+            try {
+                sessionId = sessionAccess.insert(session).get()[0];
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             for(JSONObject obj : readingSessions) {
                 try {
                     JsonToDb.InsertJson(obj, sessionId, db);
-                } catch (JSONException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }

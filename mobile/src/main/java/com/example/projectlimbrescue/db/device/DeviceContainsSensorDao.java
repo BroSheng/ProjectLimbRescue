@@ -4,6 +4,8 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /*
 Data access object for the DeviceContainsSensor relationship. Contains only insert and delete methods.
  */
@@ -12,8 +14,8 @@ Data access object for the DeviceContainsSensor relationship. Contains only inse
 public interface DeviceContainsSensorDao {
 
     @Insert
-    void insert(DeviceContainsSensor... devicesContainingSensors);
+    ListenableFuture<long[]> insert(DeviceContainsSensor... devicesContainingSensors);
 
     @Delete
-    void delete(DeviceContainsSensor deviceContainsSensor);
+    ListenableFuture<Integer> delete(DeviceContainsSensor deviceContainsSensor);
 }

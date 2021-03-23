@@ -15,6 +15,7 @@ import com.example.projectlimbrescue.db.session.SessionWithReadings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class DataAnalysisActivity extends AppCompatActivity {
 
@@ -30,7 +31,14 @@ public class DataAnalysisActivity extends AppCompatActivity {
 
         // get session with readings
         long[] sessionIds = { sessionId };
-        List<SessionWithReadings> sessions = sessionDao.getSessionsWithReadingsByIds(sessionIds);
+        List<SessionWithReadings> sessions = null;
+        try {
+            sessions = sessionDao.getSessionsWithReadingsByIds(sessionIds).get();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         SessionWithReadings recentSession = sessions.get(0);
 
         // TODO: Implement a database view for this logic

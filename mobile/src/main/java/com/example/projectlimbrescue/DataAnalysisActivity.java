@@ -1,6 +1,8 @@
 package com.example.projectlimbrescue;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -23,10 +25,14 @@ import java.util.concurrent.Executors;
 
 public class DataAnalysisActivity extends AppCompatActivity {
 
+    private ProgressBar spinner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_data_analysis);
+
+        spinner = findViewById(R.id.progressBar1);
 
         long sessionId = getIntent().getLongExtra("SESSION_ID", 0);
 
@@ -76,6 +82,8 @@ public class DataAnalysisActivity extends AppCompatActivity {
                         leftValue[i] = leftArm.get(i).value;
                     }
 
+                    spinner.setVisibility(View.INVISIBLE);
+
                     FragmentManager fm = getSupportFragmentManager();
                     Fragment fragment = fm.findFragmentById(R.id.fragment_container_view);
 
@@ -100,6 +108,6 @@ public class DataAnalysisActivity extends AppCompatActivity {
                 }
             }
         }, service);
-
+        spinner.setVisibility(View.VISIBLE);
     }
 }

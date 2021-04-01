@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
     private static final String TAG = "MainActivity";
 
     private Button mSendStartMessageBtn;
+    private ProgressBar spinner;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
@@ -203,6 +205,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     private void setupViews() {
         mSendStartMessageBtn = findViewById(R.id.start_activity);
+        spinner = findViewById(R.id.progressBar1);
     }
 
     private byte[] longToByteArr(long time) {
@@ -269,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     });
                     future.addListener(new Runnable() {
                         public void run() {
+                            spinner.setVisibility(View.INVISIBLE);
                             Intent intent = new Intent(getBaseContext(), DataAnalysisActivity.class);
                             intent.putExtra("SESSION_ID", sessionIdFinal);
                             startActivity(intent);
@@ -276,6 +280,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     }, service);
                 }
             }, service);
+            spinner.setVisibility(View.VISIBLE);
         }
     }
 }

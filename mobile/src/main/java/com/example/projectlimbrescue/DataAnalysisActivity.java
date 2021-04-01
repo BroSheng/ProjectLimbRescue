@@ -14,25 +14,20 @@ import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 public class DataAnalysisActivity extends AppCompatActivity {
 
     private void meanAverage(List<Double> values) {
-        final int WINDOW_SIZE = 3;
+        final int WINDOW_SIZE = 1;
 
-        Queue<Double> rollingValues = new LinkedList<>();
-        double rollingMean = 0.0;
-
-        for (int i = 0; i < values.size(); i++) {
-            rollingValues.add(values.get(i));
-            rollingMean += values.get(i);
-            if (rollingValues.size() > WINDOW_SIZE) {
-                rollingMean -= rollingValues.remove();
+        for (int i = WINDOW_SIZE; i < values.size() - WINDOW_SIZE; i++) {
+            double value = values.get(i);
+            for (int k = 0; k < WINDOW_SIZE; k++) {
+                value += values.get(i - k);
+                value += values.get(i + k);
             }
-            values.set(i, rollingMean / WINDOW_SIZE);
+            values.set(i, value / (WINDOW_SIZE * 2 + 1));
         }
     }
 
@@ -44,7 +39,6 @@ public class DataAnalysisActivity extends AppCompatActivity {
         long startTime = time[0];
         double startValue = value[0];
 
-        List<Long> lowFreqTime = new ArrayList<>();
         List<Double> lowFreqValue = new ArrayList<>();
 
         for (int i = 0; i < time.length; i++) {
@@ -52,15 +46,17 @@ public class DataAnalysisActivity extends AppCompatActivity {
             value[i] -= startValue;
 
             if (i % 10 == 0) {
-                lowFreqTime.add(time[i]);
                 lowFreqValue.add(value[i]);
             }
         }
 
+        lowFreqValue.add(value[value.length - 1]);
+
         meanAverage(lowFreqValue);
 
         for (int i = 0; i < value.length; i++) {
-            value[i] = value[i] - lowFreqValue.get(i / 10);
+            int index = Math.min((i + value.length / 20) / 10, lowFreqValue.size() - 1);
+            value[i] -= lowFreqValue.get(index);
         }
     }
 

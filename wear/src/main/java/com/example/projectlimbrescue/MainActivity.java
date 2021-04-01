@@ -205,7 +205,7 @@ public class MainActivity extends FragmentActivity implements
                 this.calibrationOffset = event.timestamp;
             }
             // Convert to a 5V analog reading.
-            float reading = (event.values[0] / event.sensor.getMaximumRange()) * 5.0f;
+            float reading = event.values[0];
             long timestamp = event.timestamp - this.calibrationOffset;
             JSONObject sensorReading = new JSONObject();
             try {

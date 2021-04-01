@@ -11,9 +11,9 @@ import androidx.fragment.app.FragmentManager;
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.reading.Reading;
-import com.example.shared.ReadingLimb;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
+import com.example.shared.ReadingLimb;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -82,10 +82,8 @@ public class DataAnalysisActivity extends AppCompatActivity {
                         leftValue[i] = leftArm.get(i).value;
                     }
 
-                    DataAnalysisActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            spinner.setVisibility(View.INVISIBLE);
-                        }
+                    DataAnalysisActivity.this.runOnUiThread(() -> {
+                        spinner.setVisibility(View.INVISIBLE);
                     });
 
                     FragmentManager fm = getSupportFragmentManager();

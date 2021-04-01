@@ -8,13 +8,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
 
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
@@ -285,7 +282,10 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     }, service);
                 }
             }, service);
-            spinner.setVisibility(View.VISIBLE);
+            runOnUiThread(() -> {
+                        spinner.setVisibility(View.VISIBLE);
+                    }
+            );
         }
     }
 }

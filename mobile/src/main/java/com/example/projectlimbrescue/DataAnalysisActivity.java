@@ -82,7 +82,11 @@ public class DataAnalysisActivity extends AppCompatActivity {
                         leftValue[i] = leftArm.get(i).value;
                     }
 
-                    spinner.setVisibility(View.INVISIBLE);
+                    DataAnalysisActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            spinner.setVisibility(View.INVISIBLE);
+                        }
+                    });
 
                     FragmentManager fm = getSupportFragmentManager();
                     Fragment fragment = fm.findFragmentById(R.id.fragment_container_view);

@@ -272,7 +272,12 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
                     });
                     future.addListener(new Runnable() {
                         public void run() {
-                            spinner.setVisibility(View.INVISIBLE);
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    spinner.setVisibility(View.INVISIBLE);
+                                }
+                            });
+
                             Intent intent = new Intent(getBaseContext(), DataAnalysisActivity.class);
                             intent.putExtra("SESSION_ID", sessionIdFinal);
                             startActivity(intent);

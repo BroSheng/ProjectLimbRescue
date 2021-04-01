@@ -7,7 +7,6 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,14 +41,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-/*
- * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some
- *  work.
- */
 public class MainActivity extends FragmentActivity implements
         DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener,
@@ -256,10 +250,10 @@ public class MainActivity extends FragmentActivity implements
         public void onEnterAmbient(Bundle ambientDetails) {
             super.onEnterAmbient(ambientDetails);
 
-            TextView status = (TextView) findViewById(R.id.status);
+            TextView status = findViewById(R.id.status);
             status.setVisibility(View.INVISIBLE);
 
-            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.INVISIBLE);
         }
 
@@ -267,10 +261,10 @@ public class MainActivity extends FragmentActivity implements
         public void onExitAmbient() {
             super.onExitAmbient();
 
-            TextView status = (TextView) findViewById(R.id.status);
+            TextView status = findViewById(R.id.status);
             status.setVisibility(View.VISIBLE);
 
-            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.VISIBLE);
         }
 

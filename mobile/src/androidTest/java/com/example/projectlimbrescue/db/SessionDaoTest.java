@@ -77,8 +77,8 @@ public class SessionDaoTest {
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
 
-        sessionDao.insert(session);
-        List<Session> sessions = sessionDao.getSessions();
+        sessionDao.insert(session).get();
+        List<Session> sessions = sessionDao.getSessions().get();
 
         DbTestUtils.assertSessionEquals(session, sessions.get(0));
     }
@@ -90,8 +90,8 @@ public class SessionDaoTest {
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
 
-        sessionDao.insert(session);
-        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123});
+        sessionDao.insert(session).get();
+        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123}).get();
 
         DbTestUtils.assertSessionEquals(session, sessions.get(0));
     }
@@ -108,8 +108,8 @@ public class SessionDaoTest {
         session2.startTime = new Timestamp(1000);
         session2.endTime = new Timestamp(2000);
 
-        sessionDao.insert(session1, session2);
-        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123, 456});
+        sessionDao.insert(session1, session2).get();
+        List<Session> sessions = sessionDao.getSessionsByIds(new long[]{123, 456}).get();
 
         DbTestUtils.assertSessionEquals(session1, sessions.get(0));
         DbTestUtils.assertSessionEquals(session2, sessions.get(1));
@@ -122,10 +122,10 @@ public class SessionDaoTest {
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
 
-        sessionDao.insert(session);
-        sessionDao.delete(session);
+        sessionDao.insert(session).get();
+        sessionDao.delete(session).get();
 
-        List<Session> sessions = sessionDao.getSessions();
+        List<Session> sessions = sessionDao.getSessions().get();
 
         assertEquals(sessions.size(), 0);
     }
@@ -145,15 +145,15 @@ public class SessionDaoTest {
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
 
-        sessionDao.insert(session);
-        deviceDao.insert(device);
+        sessionDao.insert(session).get();
+        deviceDao.insert(device).get();
 
         SessionReadsFromDevice sessionReadsFromDevice = new SessionReadsFromDevice();
         sessionReadsFromDevice.sessionId = session.sessionId;
         sessionReadsFromDevice.deviceId = device.deviceId;
-        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice);
+        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice).get();
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevices();
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevices().get();
         Session foundSession = sessionsWithDevices.get(0).session;
         List<Device> foundDevices = sessionsWithDevices.get(0).devices;
 
@@ -172,15 +172,15 @@ public class SessionDaoTest {
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
 
-        sessionDao.insert(session);
-        deviceDao.insert(device);
+        sessionDao.insert(session).get();
+        deviceDao.insert(device).get();
 
         SessionReadsFromDevice sessionReadsFromDevice = new SessionReadsFromDevice();
         sessionReadsFromDevice.sessionId = session.sessionId;
         sessionReadsFromDevice.deviceId = device.deviceId;
-        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice);
+        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice).get();
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123}).get();
         Session foundSession = sessionsWithDevices.get(0).session;
         List<Device> foundDevices = sessionsWithDevices.get(0).devices;
 
@@ -204,8 +204,8 @@ public class SessionDaoTest {
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
 
-        sessionDao.insert(session1, session2);
-        deviceDao.insert(device);
+        sessionDao.insert(session1, session2).get();
+        deviceDao.insert(device).get();
 
         SessionReadsFromDevice session1ReadsFromDevice = new SessionReadsFromDevice();
         session1ReadsFromDevice.sessionId = session1.sessionId;
@@ -214,9 +214,9 @@ public class SessionDaoTest {
         SessionReadsFromDevice session2ReadsFromDevice = new SessionReadsFromDevice();
         session2ReadsFromDevice.sessionId = session2.sessionId;
         session2ReadsFromDevice.deviceId = device.deviceId;
-        sessionReadsFromDeviceDao.insert(session1ReadsFromDevice, session2ReadsFromDevice);
+        sessionReadsFromDeviceDao.insert(session1ReadsFromDevice, session2ReadsFromDevice).get();
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456}).get();
         Session foundSession1 = sessionsWithDevices.get(0).session;
         Session foundSession2 = sessionsWithDevices.get(1).session;
         List<Device> foundDevices1 = sessionsWithDevices.get(0).devices;
@@ -243,8 +243,8 @@ public class SessionDaoTest {
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
 
-        sessionDao.insert(session);
-        deviceDao.insert(device1, device2);
+        sessionDao.insert(session).get();
+        deviceDao.insert(device1, device2).get();
 
         SessionReadsFromDevice sessionReadsFromDevice1 = new SessionReadsFromDevice();
         sessionReadsFromDevice1.sessionId = session.sessionId;
@@ -253,9 +253,9 @@ public class SessionDaoTest {
         SessionReadsFromDevice sessionReadsFromDevice2 = new SessionReadsFromDevice();
         sessionReadsFromDevice2.sessionId = session.sessionId;
         sessionReadsFromDevice2.deviceId = device2.deviceId;
-        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice1, sessionReadsFromDevice2);
+        sessionReadsFromDeviceDao.insert(sessionReadsFromDevice1, sessionReadsFromDevice2).get();
 
-        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456});
+        List<SessionWithDevices> sessionsWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{123, 456}).get();
         Session foundSession = sessionsWithDevices.get(0).session;
         List<Device> foundDevices = sessionsWithDevices.get(0).devices;
 
@@ -280,12 +280,12 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading = new Reading();
@@ -297,10 +297,10 @@ public class SessionDaoTest {
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
-        sessionDao.insert(session);
-        readingDao.insert(reading);
+        sessionDao.insert(session).get();
+        readingDao.insert(reading).get();
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadings();
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadings().get();
         Session foundSession = sessionsWithReadings.get(0).session;
         List<Reading> foundReadings = sessionsWithReadings.get(0).readings;
 
@@ -319,12 +319,12 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading = new Reading();
@@ -336,10 +336,10 @@ public class SessionDaoTest {
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
-        sessionDao.insert(session);
-        readingDao.insert(reading);
+        sessionDao.insert(session).get();
+        readingDao.insert(reading).get();
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123}).get();
         Session foundSession = sessionsWithReadings.get(0).session;
         List<Reading> foundReadings = sessionsWithReadings.get(0).readings;
 
@@ -363,12 +363,12 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the readings themselves
         Reading reading1 = new Reading();
@@ -389,10 +389,10 @@ public class SessionDaoTest {
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 
-        sessionDao.insert(session1, session2);
-        readingDao.insert(reading1, reading2);
+        sessionDao.insert(session1, session2).get();
+        readingDao.insert(reading1, reading2).get();
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123, 456});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123, 456}).get();
         Session foundSession1 = sessionsWithReadings.get(0).session;
         Session foundSession2 = sessionsWithReadings.get(1).session;
         List<Reading> foundReadings1 = sessionsWithReadings.get(0).readings;
@@ -415,12 +415,12 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading1 = new Reading();
@@ -441,10 +441,10 @@ public class SessionDaoTest {
         reading2.value = 123.456f;
         reading2.limb = ReadingLimb.LEFT_ARM;
 
-        sessionDao.insert(session);
-        readingDao.insert(reading1, reading2);
+        sessionDao.insert(session).get();
+        readingDao.insert(reading1, reading2).get();
 
-        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123});
+        List<SessionWithReadings> sessionsWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{123}).get();
         Session foundSession = sessionsWithReadings.get(0).session;
         List<Reading> foundReadings = sessionsWithReadings.get(0).readings;
 
@@ -468,15 +468,15 @@ public class SessionDaoTest {
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
 
-        sessionDao.insert(session);
-        sensorDao.insert(sensor);
+        sessionDao.insert(session).get();
+        sensorDao.insert(sensor).get();
 
         SessionMeasuresSensor sessionMeasuresSensor = new SessionMeasuresSensor();
         sessionMeasuresSensor.sessionId = session.sessionId;
         sessionMeasuresSensor.sensorId = sensor.sensorId;
-        sessionMeasuresSensorDao.insert(sessionMeasuresSensor);
+        sessionMeasuresSensorDao.insert(sessionMeasuresSensor).get();
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensors();
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensors().get();
         Session foundSession = sessionsWithSensors.get(0).session;
         List<Sensor> foundSensors = sessionsWithSensors.get(0).sensors;
 
@@ -495,15 +495,15 @@ public class SessionDaoTest {
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
 
-        sessionDao.insert(session);
-        sensorDao.insert(sensor);
+        sessionDao.insert(session).get();
+        sensorDao.insert(sensor).get();
 
         SessionMeasuresSensor sessionMeasuresSensor = new SessionMeasuresSensor();
         sessionMeasuresSensor.sessionId = session.sessionId;
         sessionMeasuresSensor.sensorId = sensor.sensorId;
         sessionMeasuresSensorDao.insert(sessionMeasuresSensor);
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123}).get();
         Session foundSession = sessionsWithSensors.get(0).session;
         List<Sensor> foundSensors = sessionsWithSensors.get(0).sensors;
 
@@ -527,8 +527,8 @@ public class SessionDaoTest {
         sensor.sensorId = 123;
         sensor.desc = SensorDesc.PPG;
 
-        sessionDao.insert(session1, session2);
-        sensorDao.insert(sensor);
+        sessionDao.insert(session1, session2).get();
+        sensorDao.insert(sensor).get();
 
         SessionMeasuresSensor session1MeasuresSensor = new SessionMeasuresSensor();
         session1MeasuresSensor.sessionId = session1.sessionId;
@@ -537,9 +537,9 @@ public class SessionDaoTest {
         SessionMeasuresSensor session2MeasuresSensor = new SessionMeasuresSensor();
         session2MeasuresSensor.sessionId = session2.sessionId;
         session2MeasuresSensor.sensorId = sensor.sensorId;
-        sessionMeasuresSensorDao.insert(session1MeasuresSensor, session2MeasuresSensor);
+        sessionMeasuresSensorDao.insert(session1MeasuresSensor, session2MeasuresSensor).get();
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123, 456});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123, 456}).get();
         Session foundSession1 = sessionsWithSensors.get(0).session;
         Session foundSession2 = sessionsWithSensors.get(1).session;
         List<Sensor> foundSensors1 = sessionsWithSensors.get(0).sensors;
@@ -566,8 +566,8 @@ public class SessionDaoTest {
         sensor2.sensorId = 456;
         sensor2.desc = SensorDesc.PPG;
 
-        sessionDao.insert(session);
-        sensorDao.insert(sensor1, sensor2);
+        sessionDao.insert(session).get();
+        sensorDao.insert(sensor1, sensor2).get();
 
         SessionMeasuresSensor sessionMeasuresSensor1 = new SessionMeasuresSensor();
         sessionMeasuresSensor1.sessionId = session.sessionId;
@@ -576,9 +576,9 @@ public class SessionDaoTest {
         SessionMeasuresSensor sessionMeasuresSensor2 = new SessionMeasuresSensor();
         sessionMeasuresSensor2.sessionId = session.sessionId;
         sessionMeasuresSensor2.sensorId = sensor2.sensorId;
-        sessionMeasuresSensorDao.insert(sessionMeasuresSensor1, sessionMeasuresSensor2);
+        sessionMeasuresSensorDao.insert(sessionMeasuresSensor1, sessionMeasuresSensor2).get();
 
-        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123});
+        List<SessionWithSensors> sessionsWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{123}).get();
         Session foundSession = sessionsWithSensors.get(0).session;
         List<Sensor> foundSensors = sessionsWithSensors.get(0).sensors;
 

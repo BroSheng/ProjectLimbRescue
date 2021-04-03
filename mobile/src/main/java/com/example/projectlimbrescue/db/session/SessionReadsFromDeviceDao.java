@@ -4,6 +4,8 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /*
 Data access object for the SessionReadsFromDevice relationship. Contains only insert and delete methods.
  */
@@ -12,8 +14,8 @@ Data access object for the SessionReadsFromDevice relationship. Contains only in
 public interface SessionReadsFromDeviceDao {
 
     @Insert
-    void insert(SessionReadsFromDevice... sessionsReadingFromDevices);
+    ListenableFuture<long[]> insert(SessionReadsFromDevice... sessionsReadingFromDevices);
 
     @Delete
-    void delete(SessionReadsFromDevice sessionReadingFromDevice);
+    ListenableFuture<Integer> delete(SessionReadsFromDevice sessionReadingFromDevice);
 }

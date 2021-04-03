@@ -7,13 +7,11 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
 
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
@@ -33,6 +31,9 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,12 +48,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
     private static final String TAG = "MainActivity";
 
     private Button mSendStartMessageBtn;
+    private ProgressBar spinner;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
@@ -199,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
 
     private void setupViews() {
         mSendStartMessageBtn = findViewById(R.id.start_activity);
+        spinner = findViewById(R.id.progressBar1);
     }
 
     private byte[] longToByteArr(long time) {
@@ -231,18 +235,57 @@ public class MainActivity extends AppCompatActivity implements DataClient.OnData
             session.startTime = new Timestamp(startTime);
             session.endTime = new Timestamp(endTime);
 
-            long sessionId = sessionAccess.insert(session)[0];
-            for(JSONObject obj : readingSessions) {
-                try {
-                    JsonToDb.InsertJson(obj, sessionId, db);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
+            ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+            ListenableFuture<long[]> sessionIdFuture = sessionAccess.insert(session);
+            sessionIdFuture.addListener(new Runnable() {
+                public void run() {
+                    long sessionId = 0;
+                    try {
+                        sessionId = sessionIdFuture.get()[0];
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    final long sessionIdFinal = sessionId;
+                    ListenableFuture future = service.submit(new Runnable() {
+                        public void run() {
+                            for(JSONObject obj : readingSessions) {
+                                try {
+                                    try {
+                                        JsonToDb.InsertJson(obj, sessionIdFinal, db);
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    } catch (ExecutionException e) {
+                                        e.printStackTrace();
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+                    future.addListener(new Runnable() {
+                        public void run() {
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                public void run() {
+                                    spinner.setVisibility(View.INVISIBLE);
+                                }
+                            });
 
-            Intent intent = new Intent(getBaseContext(), DataAnalysisActivity.class);
-            intent.putExtra("SESSION_ID", sessionId);
-            startActivity(intent);
+                            Intent intent = new Intent(getBaseContext(), DataAnalysisActivity.class);
+                            intent.putExtra("SESSION_ID", sessionIdFinal);
+                            startActivity(intent);
+                        }
+                    }, service);
+                }
+            }, service);
+            runOnUiThread(() -> {
+                        spinner.setVisibility(View.VISIBLE);
+                    }
+            );
         }
     }
 }

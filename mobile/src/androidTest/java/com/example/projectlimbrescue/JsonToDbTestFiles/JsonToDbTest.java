@@ -71,20 +71,20 @@ public class JsonToDbTest {
         Session session = new Session();
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        long sessionId = sessionDao.insert(session)[0];
+        long sessionId = sessionDao.insert(session).get()[0];
 
         JsonToDb.InsertJson(json1, sessionId, db);
 
         // verify that all session connections exist
-        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get(0);
+        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get().get(0);
         Device device = sessionWithDevices.devices.get(0);
         assertEquals(DeviceDesc.FOSSIL_GEN_5, device.desc);
 
-        SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get(0);
+        SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get().get(0);
         Sensor sensor = sessionWithSensors.sensors.get(0);
         assertEquals(SensorDesc.PPG, sensor.desc);
 
-        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get(0);
+        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get().get(0);
         Reading reading = sessionWithReadings.readings.get(0);
         assertEquals((long)12.34, reading.time);
         assertEquals(56.78, reading.value, 0.01f);
@@ -92,11 +92,11 @@ public class JsonToDbTest {
         // verify that all device connections exist
         long deviceId = device.deviceId;
 
-        DeviceWithSensors deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{deviceId}).get(0);
+        DeviceWithSensors deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{deviceId}).get().get(0);
         sensor = deviceWithSensors.sensors.get(0);
         assertEquals(SensorDesc.PPG, sensor.desc);
 
-        DeviceWithReadings deviceWithReadings = deviceDao.getDevicesWithReadingsByIds(new long[]{deviceId}).get(0);
+        DeviceWithReadings deviceWithReadings = deviceDao.getDevicesWithReadingsByIds(new long[]{deviceId}).get().get(0);
         reading = deviceWithReadings.readings.get(0);
         assertEquals((long)12.34, reading.time);
         assertEquals(56.78, reading.value, 0.01f);
@@ -104,7 +104,7 @@ public class JsonToDbTest {
         // verify that all sensor connections exist
         long sensorId = sensor.sensorId;
 
-        SensorWithReadings sensorWithReadings = sensorDao.getSensorsWithReadingsByIds(new long[]{sensorId}).get(0);
+        SensorWithReadings sensorWithReadings = sensorDao.getSensorsWithReadingsByIds(new long[]{sensorId}).get().get(0);
         reading = deviceWithReadings.readings.get(0);
         assertEquals((long)12.34, reading.time);
         assertEquals(56.78, reading.value, 0.01f);
@@ -119,12 +119,12 @@ public class JsonToDbTest {
         Session session = new Session();
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        long sessionId = sessionDao.insert(session)[0];
+        long sessionId = sessionDao.insert(session).get()[0];
 
         JsonToDb.InsertJson(json1, sessionId, db);
 
         // verify both readings exist
-        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get(0);
+        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get().get(0);
         Reading reading1 = sessionWithReadings.readings.get(0);
         assertEquals((long)12.34, reading1.time);
         assertEquals(56.78, reading1.value, 0.01f);
@@ -145,23 +145,23 @@ public class JsonToDbTest {
         Session session = new Session();
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        long sessionId = sessionDao.insert(session)[0];
+        long sessionId = sessionDao.insert(session).get()[0];
 
         JsonToDb.InsertJson(json1, sessionId, db);
         JsonToDb.InsertJson(json2, sessionId, db);
 
         // verify that both readings exist and no duplicates are logged
-        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get(0);
+        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get().get(0);
         Device device = sessionWithDevices.devices.get(0);
         assertEquals(DeviceDesc.FOSSIL_GEN_5, device.desc);
         assertEquals(1, sessionWithDevices.devices.size());
 
-        SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get(0);
+        SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get().get(0);
         Sensor sensor = sessionWithSensors.sensors.get(0);
         assertEquals(SensorDesc.PPG, sensor.desc);
         assertEquals(1, sessionWithSensors.sensors.size());
 
-        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get(0);
+        SessionWithReadings sessionWithReadings = sessionDao.getSessionsWithReadingsByIds(new long[]{sessionId}).get().get(0);
 
         Reading reading1 = sessionWithReadings.readings.get(0);
         assertEquals((long)12.34, reading1.time);

@@ -7,45 +7,52 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.reading.Reading;
-import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements AdapterView.OnItemSelectedListener {
 
     // ViewHolder subclass for HistoryFragment RecyclerView
     private class HistoryHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mSessionID;
-        private TextView mLimbTextView;
+        private TextView mSessionIDTextView;
+        private TextView mDateTextView;
         private SessionWithReadings mSession;
 
         public HistoryHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_history, parent, false));
             itemView.setOnClickListener(this);
 
-            mSessionID = itemView.findViewById(R.id.history_id);
-            mLimbTextView = itemView.findViewById(R.id.history_limb);
+            mSessionIDTextView = itemView.findViewById(R.id.history_id);
+            mDateTextView = itemView.findViewById(R.id.history_date);
         }
 
         public void bind(SessionWithReadings session) {
             mSession = session;
             String sessionText = "Session ID " + session.session.sessionId;
-            mSessionID.setText(sessionText);
-            String limb = "Limb: " + session.readings.get(0).limb.name();
-            mLimbTextView.setText(limb);
+            mSessionIDTextView.setText(sessionText);
+            String sessionDate = session.session.startTime.toString();
+            mDateTextView.setText(sessionDate);
         }
 
         @Override
@@ -98,10 +105,14 @@ public class HistoryFragment extends Fragment {
 
     // Adapter class
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
+        // master list of sessions
+        private List<SessionWithReadings> mSessionsMaster;
+        // what's actually displayed & filtered
         private List<SessionWithReadings> mSessions;
 
         public HistoryAdapter(List<SessionWithReadings> sessions) {
-            mSessions = sessions;
+            mSessionsMaster = sessions;
+            mSessions = new LinkedList<>(mSessionsMaster);
         }
 
         @NonNull
@@ -122,10 +133,58 @@ public class HistoryFragment extends Fragment {
         public int getItemCount() {
             return mSessions.size();
         }
+
+        // TODO: look into using something like SortedList b/c notifyDataSetChanged() is expensive
+
+        // filters the list to only show sessions from one limb
+        public void filterLimb(ReadingLimb limb) {
+            // going backwards means we can delete without skipping elements
+            for (int i = mSessions.size() - 1; i >= 0; i--) {
+                // if a session contains a reading from the other limb, remove it
+                List<Reading> readings = mSessions.get(i).readings;
+                for (Reading r : readings) {
+                    if (r.limb != limb) {
+                        mSessions.remove(i);
+                        break;
+                    }
+                }
+            }
+
+            // let adapter know data changed to adjust UI
+            notifyDataSetChanged();
+        }
+
+        // shows all sessions from any and all limbs
+        public void filterNone() {
+            mSessions = new LinkedList<>(mSessionsMaster);
+            // let adapter know data changed to adjust UI
+            notifyDataSetChanged();
+        }
+
+        public void sortDateMostRecent() {
+            Collections.sort(mSessions, new Comparator<SessionWithReadings>() {
+                @Override
+                public int compare(SessionWithReadings o1, SessionWithReadings o2) {
+                    return o2.session.startTime.compareTo(o1.session.startTime);
+                }
+            });
+            notifyDataSetChanged();
+        }
+
+        public void sortDateEarliest() {
+            Collections.sort(mSessions, new Comparator<SessionWithReadings>() {
+                @Override
+                public int compare(SessionWithReadings o1, SessionWithReadings o2) {
+                    return o1.session.startTime.compareTo(o2.session.startTime);
+                }
+            });
+            notifyDataSetChanged();
+        }
     }
 
     private RecyclerView mHistoryRecyclerView;
     private HistoryAdapter mAdapter;
+    private Spinner mLimbFilterSpinner;
     private AppDatabase db;
 
     public HistoryFragment() {
@@ -150,6 +209,14 @@ public class HistoryFragment extends Fragment {
         mHistoryRecyclerView = view.findViewById(R.id.history_recycler_view);
         mHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
+        // set up limb filter
+        mLimbFilterSpinner = view.findViewById(R.id.history_limb_filter);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                getContext(), R.array.filter_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mLimbFilterSpinner.setAdapter(adapter);
+        mLimbFilterSpinner.setOnItemSelectedListener(this);
+
         // set the UI
         updateUI();
 
@@ -162,8 +229,34 @@ public class HistoryFragment extends Fragment {
         SessionDao sessionDao = db.sessionDao();
         List<SessionWithReadings> sessions = sessionDao.getSessionsWithReadings();
 
+        // TODO: get sensors and readings, look at limbs in sensors
+
         mAdapter = new HistoryAdapter(sessions);
         mHistoryRecyclerView.setAdapter(mAdapter);
+    }
+
+    // on selection listeners for filter spinner
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        switch(position) {
+            case 0:
+                // all limbs
+                mAdapter.filterNone();
+                break;
+            case 1:
+                // left limb
+                mAdapter.filterLimb(ReadingLimb.LEFT_ARM);
+                break;
+            case 2:
+                // right limb
+                mAdapter.filterLimb(ReadingLimb.RIGHT_ARM);
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // do nothing
     }
 
 }

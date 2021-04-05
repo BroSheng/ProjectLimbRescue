@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import androidx.annotation.RequiresPermission;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -11,9 +12,11 @@ import androidx.fragment.app.FragmentManager;
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.reading.Reading;
+import com.example.projectlimbrescue.db.reading.ReadingDao;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -37,30 +40,20 @@ public class DataAnalysisActivity extends AppCompatActivity {
         long sessionId = getIntent().getLongExtra("SESSION_ID", 0);
 
         AppDatabase db = DatabaseSingleton.getInstance(getApplicationContext());
-        SessionDao sessionDao = db.sessionDao();
+        ReadingDao readingDao = db.readingDao();
 
-        // get session with readings
-        long[] sessionIds = { sessionId };
+        // get readings from session id for each limb
+
         ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
-        ListenableFuture<List<SessionWithReadings>> sessionsFuture = sessionDao.getSessionsWithReadingsByIds(sessionIds);
-        sessionsFuture.addListener(new Runnable() {
+        ListenableFuture<List<Reading>> leftReadingsFuture = readingDao.getReadingsForSessionIdAndLimb(sessionId, ReadingLimb.LEFT_ARM);
+        ListenableFuture<List<Reading>> rightReadingsFuture = readingDao.getReadingsForSessionIdAndLimb(sessionId, ReadingLimb.RIGHT_ARM);
+
+        ListenableFuture<List<List<Reading>>> bothReadingsFuture = Futures.allAsList(leftReadingsFuture, rightReadingsFuture);
+        bothReadingsFuture.addListener(new Runnable() {
             public void run() {
                 try {
-                    List<SessionWithReadings>  sessions = sessionsFuture.get();
-                    SessionWithReadings recentSession = sessions.get(0);
-
-
-                    // TODO: Implement a database view for this logic
-                    List<Reading> rightArm = new ArrayList<>();
-                    List<Reading> leftArm = new ArrayList<>();
-
-                    for(Reading reading : recentSession.readings) {
-                        if(reading.limb == ReadingLimb.RIGHT_ARM) {
-                            rightArm.add(reading);
-                        } else if (reading.limb == ReadingLimb.LEFT_ARM) {
-                            leftArm.add(reading);
-                        }
-                    }
+                    List<Reading> leftArm = bothReadingsFuture.get().get(0);
+                    List<Reading> rightArm = bothReadingsFuture.get().get(1);
 
                     // turn readings into x and y arrays
                     long[] rightTime = new long[rightArm.size()];

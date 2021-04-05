@@ -17,6 +17,16 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.projectlimbrescue.DataAnalysisActivity"/>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.projectlimbrescue.fileprovider"
+            android:grantUriPermissions="true"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
     </application>
 
 </manifest>

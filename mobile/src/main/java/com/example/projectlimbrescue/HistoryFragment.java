@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +24,10 @@ import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -130,6 +134,8 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
             return mSessions.size();
         }
 
+        // TODO: look into using something like SortedList b/c notifyDataSetChanged() is expensive
+
         // filters the list to only show sessions from one limb
         public void filterLimb(ReadingLimb limb) {
             // going backwards means we can delete without skipping elements
@@ -152,6 +158,26 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
         public void filterNone() {
             mSessions = new LinkedList<>(mSessionsMaster);
             // let adapter know data changed to adjust UI
+            notifyDataSetChanged();
+        }
+
+        public void sortDateMostRecent() {
+            Collections.sort(mSessions, new Comparator<SessionWithReadings>() {
+                @Override
+                public int compare(SessionWithReadings o1, SessionWithReadings o2) {
+                    return o2.session.startTime.compareTo(o1.session.startTime);
+                }
+            });
+            notifyDataSetChanged();
+        }
+
+        public void sortDateEarliest() {
+            Collections.sort(mSessions, new Comparator<SessionWithReadings>() {
+                @Override
+                public int compare(SessionWithReadings o1, SessionWithReadings o2) {
+                    return o1.session.startTime.compareTo(o2.session.startTime);
+                }
+            });
             notifyDataSetChanged();
         }
     }
@@ -202,6 +228,8 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
         db = DatabaseSingleton.getInstance(getContext());
         SessionDao sessionDao = db.sessionDao();
         List<SessionWithReadings> sessions = sessionDao.getSessionsWithReadings();
+
+        // TODO: get sensors and readings, look at limbs in sensors
 
         mAdapter = new HistoryAdapter(sessions);
         mHistoryRecyclerView.setAdapter(mAdapter);

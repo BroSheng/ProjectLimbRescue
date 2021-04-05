@@ -144,6 +144,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         sessionDao.insert(session);
         deviceDao.insert(device);
@@ -171,6 +172,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         sessionDao.insert(session);
         deviceDao.insert(device);
@@ -203,6 +205,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         sessionDao.insert(session1, session2);
         deviceDao.insert(device);
@@ -238,10 +241,12 @@ public class SessionDaoTest {
         Device device1 = new Device();
         device1.deviceId = 123;
         device1.desc = DeviceDesc.FOSSIL_GEN_5;
+        device1.limb = ReadingLimb.LEFT_ARM;
 
         Device device2 = new Device();
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
+        device2.limb = ReadingLimb.LEFT_ARM;
 
         sessionDao.insert(session);
         deviceDao.insert(device1, device2);
@@ -280,6 +285,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -319,6 +325,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -363,6 +370,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -415,6 +423,7 @@ public class SessionDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();

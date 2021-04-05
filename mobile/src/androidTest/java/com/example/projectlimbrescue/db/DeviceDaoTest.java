@@ -75,6 +75,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         deviceDao.insert(device);
         List<Device> devices = deviceDao.getDevices();
@@ -87,6 +88,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         deviceDao.insert(device);
         List<Device> devices = deviceDao.getDevicesByDesc(DeviceDesc.FOSSIL_GEN_5);
@@ -99,6 +101,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         deviceDao.insert(device);
         List<Device> devices = deviceDao.getDevicesByIds(new int[]{123});
@@ -111,10 +114,12 @@ public class DeviceDaoTest {
         Device device1 = new Device();
         device1.deviceId = 123;
         device1.desc = DeviceDesc.FOSSIL_GEN_5;
+        device1.limb = ReadingLimb.LEFT_ARM;
 
         Device device2 = new Device();
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
+        device2.limb = ReadingLimb.LEFT_ARM;
 
         deviceDao.insert(device1);
         deviceDao.insert(device2);
@@ -129,6 +134,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         deviceDao.insert(device);
         deviceDao.delete(device);
@@ -146,6 +152,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         // create valid entities for reading foreign keys
         Sensor sensor = new Sensor();
@@ -187,6 +194,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         // create valid entities for reading foreign keys
         Sensor sensor = new Sensor();
@@ -228,10 +236,12 @@ public class DeviceDaoTest {
         Device device1 = new Device();
         device1.deviceId = 123;
         device1.desc = DeviceDesc.FOSSIL_GEN_5;
+        device1.limb = ReadingLimb.LEFT_ARM;
 
         Device device2 = new Device();
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
+        device2.limb = ReadingLimb.LEFT_ARM;
 
         // create valid entities for reading foreign keys
         Sensor sensor = new Sensor();
@@ -289,6 +299,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         // create valid entities for reading foreign keys
         Sensor sensor = new Sensor();
@@ -346,6 +357,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 456;
@@ -372,6 +384,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 456;
@@ -398,10 +411,12 @@ public class DeviceDaoTest {
         Device device1 = new Device();
         device1.deviceId = 123;
         device1.desc = DeviceDesc.FOSSIL_GEN_5;
+        device1.limb = ReadingLimb.LEFT_ARM;
 
         Device device2 = new Device();
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
+        device2.limb = ReadingLimb.LEFT_ARM;
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 456;
@@ -437,6 +452,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Sensor sensor1 = new Sensor();
         sensor1.sensorId = 123;
@@ -476,6 +492,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Session session = new Session();
         session.sessionId = 123;
@@ -503,6 +520,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Session session = new Session();
         session.sessionId = 123;
@@ -530,10 +548,12 @@ public class DeviceDaoTest {
         Device device1 = new Device();
         device1.deviceId = 123;
         device1.desc = DeviceDesc.FOSSIL_GEN_5;
+        device1.limb = ReadingLimb.LEFT_ARM;
 
         Device device2 = new Device();
         device2.deviceId = 456;
         device2.desc = DeviceDesc.FOSSIL_GEN_5;
+        device2.limb = ReadingLimb.LEFT_ARM;
 
         Session session = new Session();
         session.sessionId = 123;
@@ -569,6 +589,7 @@ public class DeviceDaoTest {
         Device device = new Device();
         device.deviceId = 123;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
 
         Session session1 = new Session();
         session1.sessionId = 123;

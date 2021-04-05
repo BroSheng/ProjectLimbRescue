@@ -90,6 +90,7 @@ public class JsonToDb {
         if (devicesWithDesc.size() == 0) { // no device with desc yet exists
             Device device = new Device();
             device.desc = deviceDesc;
+            device.limb = limb;
             deviceId = deviceDao.insert(device)[0];
         } else {
             deviceId = devicesWithDesc.get(0).deviceId;

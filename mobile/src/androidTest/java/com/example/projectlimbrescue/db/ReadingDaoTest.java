@@ -67,6 +67,7 @@ public class ReadingDaoTest {
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -102,6 +103,7 @@ public class ReadingDaoTest {
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -137,6 +139,7 @@ public class ReadingDaoTest {
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();
@@ -183,6 +186,8 @@ public class ReadingDaoTest {
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
+        device.limb = ReadingLimb.LEFT_ARM;
+        device.limb = ReadingLimb.LEFT_ARM;
         deviceDao.insert(device);
 
         Sensor sensor = new Sensor();

@@ -12,10 +12,10 @@
     </TextView>
 
     <TextView
-        android:id="@+id/history_limb"
+        android:id="@+id/history_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="History Limb">
+        android:text="History Date">
     </TextView>
 
 </LinearLayout>

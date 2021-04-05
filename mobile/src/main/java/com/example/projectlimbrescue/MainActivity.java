@@ -93,8 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         Session session = new Session();
         session.sessionId = 123;
-        session.startTime = new Timestamp(1000);
-        session.endTime = new Timestamp(2000);
+        session.startTime = new Timestamp(1617641110000L);
+        session.endTime = new Timestamp(1617641140000L);
 
         // create valid entities for reading foreign keys
         Device device = new Device();

@@ -1,5 +1,6 @@
 package com.example.projectlimbrescue;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -7,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SortedList;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +24,6 @@ import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +31,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class HistoryFragment extends Fragment implements AdapterView.OnItemSelectedListener {
+
+    public static final String LEFT_X_VALUES = "LEFT_X_VALUES";
+    public static final String LEFT_Y_VALUES = "LEFT_Y_VALUES";
+    public static final String RIGHT_X_VALUES = "RIGHT_X_VALUES";
+    public static final String RIGHT_Y_VALUES = "RIGHT_Y_VALUES";
 
     // ViewHolder subclass for HistoryFragment RecyclerView
     private class HistoryHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -55,64 +59,69 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
             mDateTextView.setText(sessionDate);
         }
 
+        // launch graph activity to display session
         @Override
         public void onClick(View v) {
-            List<Reading> leftReadings = new ArrayList<>();
-            List<Reading> rightReadings = new ArrayList<>();
+            List<Long> xValsLeft = new LinkedList<>();
+            List<Double> yValsLeft = new LinkedList<>();
 
-            // add readings into appropriate lists
-            for (Reading reading : mSession.readings) {
-                if (reading.limb == ReadingLimb.LEFT_ARM) {
-                    leftReadings.add(reading);
-                } else if (reading.limb == ReadingLimb.RIGHT_ARM) {
-                    rightReadings.add(reading);
+            List<Long> xValsRight = new LinkedList<>();
+            List<Double> yValsRight = new LinkedList<>();
+
+            final long startTime = mSession.session.startTime.getTime();
+            // put times into xVals
+            for (Reading r : mSession.readings) {
+                if (r.limb == ReadingLimb.LEFT_ARM) {
+                    xValsLeft.add(r.time - startTime);
+                    yValsLeft.add(r.value);
+                } else {
+                    xValsRight.add(r.time - startTime);
+                    yValsRight.add(r.value);
                 }
             }
 
-            // put x and y values into arrays
-            long[] leftTime = new long[leftReadings.size()];
-            double[] leftValue = new double[leftReadings.size()];
-            long[] rightTime = new long[rightReadings.size()];
-            double[] rightValue = new double[rightReadings.size()];
+            // convert to regular arrays to send to activity
+            long[] xLeft = new long[xValsLeft.size()];
+            double[] yLeft = new double[yValsLeft.size()];
+            long[] xRight = new long[xValsRight.size()];
+            double[] yRight = new double[xValsRight.size()];
 
-            // left readings
-            for (int i = 0; i < leftReadings.size(); i++) {
-                leftTime[i] = leftReadings.get(i).time;
-                leftValue[i] = leftReadings.get(i).value;
+            // left
+            for (int i = 0; i < xValsLeft.size(); i++) {
+                xLeft[i] = xValsLeft.get(i);
+                yLeft[i] = yValsLeft.get(i);
             }
 
-            // right readings
-            for (int i = 0; i < rightReadings.size(); i++) {
-                rightTime[i] = rightReadings.get(i).time;
-                rightValue[i] = rightReadings.get(i).value;
+            // right
+            for (int i = 0; i < xValsRight.size(); i++) {
+                xRight[i] = xValsRight.get(i);
+                yRight[i] = yValsRight.get(i);
             }
 
-            final FragmentTransaction ft = getParentFragmentManager().beginTransaction();
-            // pass bundle to graph
-            Bundle bundle = new Bundle();
-            bundle.putLongArray(GraphFragment.RIGHT_LIMB_X, rightTime);
-            bundle.putDoubleArray(GraphFragment.RIGHT_LIMB_Y, rightValue);
-            bundle.putLongArray(GraphFragment.LEFT_LIMB_X, leftTime);
-            bundle.putDoubleArray(GraphFragment.LEFT_LIMB_Y, leftValue);
-
-            ft.replace(R.id.fragment_container_view, GraphFragment.class, bundle);
-
-            ft.setReorderingAllowed(true);
-            ft.addToBackStack(null);
-            ft.commit();
+            Intent intent = new Intent(getContext(), GraphActivity.class);
+            if (xLeft.length > 0) {
+                intent.putExtra(LEFT_X_VALUES, xLeft);
+                intent.putExtra(LEFT_Y_VALUES, yLeft);
+            }
+            if (xRight.length > 0) {
+                intent.putExtra(RIGHT_X_VALUES, xRight);
+                intent.putExtra(RIGHT_Y_VALUES, yRight);
+            }
+            startActivity(intent);
         }
     }
 
     // Adapter class
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
-        // master list of sessions
-        private List<SessionWithReadings> mSessionsMaster;
-        // what's actually displayed & filtered
+        // all sessions
+        private List<SessionWithReadings> mAllSessions;
+        // sessions displayed, potentially filtered
         private List<SessionWithReadings> mSessions;
+        // TODO: split up left/right sessions in constructor (when DB is updated)
 
         public HistoryAdapter(List<SessionWithReadings> sessions) {
-            mSessionsMaster = sessions;
-            mSessions = new LinkedList<>(mSessionsMaster);
+            mAllSessions = sessions;
+            mSessions = new LinkedList<>(mAllSessions);
         }
 
         @NonNull
@@ -134,10 +143,11 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
             return mSessions.size();
         }
 
-        // TODO: look into using something like SortedList b/c notifyDataSetChanged() is expensive
+        // TODO: use getSessionWithDevices and use limb field there
 
         // filters the list to only show sessions from one limb
         public void filterLimb(ReadingLimb limb) {
+            mSessions = new LinkedList<>(mAllSessions);
             // going backwards means we can delete without skipping elements
             for (int i = mSessions.size() - 1; i >= 0; i--) {
                 // if a session contains a reading from the other limb, remove it
@@ -156,7 +166,7 @@ public class HistoryFragment extends Fragment implements AdapterView.OnItemSelec
 
         // shows all sessions from any and all limbs
         public void filterNone() {
-            mSessions = new LinkedList<>(mSessionsMaster);
+            mSessions = new LinkedList<>(mAllSessions);
             // let adapter know data changed to adjust UI
             notifyDataSetChanged();
         }

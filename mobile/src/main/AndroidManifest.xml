@@ -17,6 +17,7 @@
             </intent-filter>
         </activity>
         <activity android:name="com.example.projectlimbrescue.DataAnalysisActivity"/>
+        <activity android:name="com.example.projectlimbrescue.GraphActivity"/>
     </application>
 
 </manifest>

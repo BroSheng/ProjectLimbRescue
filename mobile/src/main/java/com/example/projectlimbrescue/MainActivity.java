@@ -128,23 +128,20 @@ public class MainActivity extends AppCompatActivity {
             session.startTime = new Timestamp(start);
             // add 30 seconds to start time go get end time
             session.endTime = new Timestamp(start + 30000);
-
             sessionDao.insert(session);
 
-            // get data from CSV file
-            // turn CSV file into readings
             List<Reading> readings = new ArrayList<>();
 
             long currentTime = start;
             boolean generateBoth = rand.nextBoolean();
             Log.d("GENERATE", "generateBoth = " + generateBoth);
+            boolean generateLeft = rand.nextBoolean();
 
-            // generate 800 readings for each session
+            // generate readings for each session
             for (int j = 0; j < 100; j++) {
 
                 // insert the reading itself
                 // left limb
-                boolean generateLeft = rand.nextBoolean();
                 if (generateBoth || generateLeft) {
                     Reading reading = new Reading();
                     reading.deviceId = device.deviceId;

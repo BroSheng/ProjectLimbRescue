@@ -2,7 +2,12 @@
 <resources>
     <string-array name="filter_array">
         <item>All</item>
-        <item>Left Limb</item>
-        <item>Right Limb</item>
+        <item>Both Arms</item>
+        <item>Left Arm</item>
+        <item>Right Arm</item>
+    </string-array>
+    <string-array name="sort_array">
+        <item>Newest Date First</item>
+        <item>Oldest Date First</item>
     </string-array>
 </resources>

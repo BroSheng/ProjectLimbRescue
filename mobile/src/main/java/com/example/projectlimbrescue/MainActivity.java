@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
         Random rand = new Random();
         // randomly generate sessions
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             Session session = new Session();
             int id;
             do {
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
             boolean generateLeft = rand.nextBoolean();
 
             // generate readings for each session
-            for (int j = 0; j < 100; j++) {
+            for (int j = 0; j < 800; j++) {
 
                 // insert the reading itself
                 // left limb

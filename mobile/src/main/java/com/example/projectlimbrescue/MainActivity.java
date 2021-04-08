@@ -30,6 +30,8 @@ import com.example.projectlimbrescue.db.sensor.Sensor;
 import com.example.projectlimbrescue.db.sensor.SensorDao;
 import com.example.projectlimbrescue.db.session.Session;
 import com.example.projectlimbrescue.db.session.SessionDao;
+import com.example.projectlimbrescue.db.session.SessionReadsFromDevice;
+import com.example.projectlimbrescue.db.session.SessionReadsFromDeviceDao;
 import com.example.shared.DeviceDesc;
 import com.example.shared.ReadingLimb;
 import com.example.shared.SensorDesc;
@@ -87,35 +89,38 @@ public class MainActivity extends AppCompatActivity {
         SensorDao sensorDao = db.sensorDao();
         DeviceDao deviceDao = db.deviceDao();
         ReadingDao readingDao = db.readingDao();
+        SessionReadsFromDeviceDao sessionReadsFromDeviceDao = db.sessionReadsFromDeviceDao();
 
         // create valid entities for reading foreign keys
-        Device device = new Device();
-        device.deviceId = 123;
-        device.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device);
+        Device deviceLeft = new Device();
+        deviceLeft.deviceId = 123;
+        deviceLeft.desc = DeviceDesc.FOSSIL_GEN_5;
+        deviceLeft.limb = ReadingLimb.LEFT_ARM;
+        deviceDao.insert(deviceLeft);
 
-        Sensor sensor = new Sensor();
-        sensor.sensorId = 321;
-        sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        Sensor sensorLeft = new Sensor();
+        sensorLeft.sensorId = 321;
+        sensorLeft.desc = SensorDesc.PPG;
+        sensorDao.insert(sensorLeft);
 
         // create valid entities for reading foreign keys
-        Device device1 = new Device();
-        device1.deviceId = 456;
-        device1.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceDao.insert(device1);
+        Device deviceRight = new Device();
+        deviceRight.deviceId = 456;
+        deviceRight.desc = DeviceDesc.FOSSIL_GEN_5;
+        deviceRight.limb = ReadingLimb.RIGHT_ARM;
+        deviceDao.insert(deviceRight);
 
-        Sensor sensor1 = new Sensor();
-        sensor1.sensorId = 654;
-        sensor1.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor1);
+        Sensor sensorRight = new Sensor();
+        sensorRight.sensorId = 654;
+        sensorRight.desc = SensorDesc.PPG;
+        sensorDao.insert(sensorRight);
 
-        // keeps track of used IDs do we don't repeat them
+        // keeps track of used IDs so we don't repeat them
         List<Integer> sessionIDs = new LinkedList<>();
 
         Random rand = new Random();
         // randomly generate sessions
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             Session session = new Session();
             int id;
             do {
@@ -134,18 +139,40 @@ public class MainActivity extends AppCompatActivity {
 
             long currentTime = start;
             boolean generateBoth = rand.nextBoolean();
-            Log.d("GENERATE", "generateBoth = " + generateBoth);
             boolean generateLeft = rand.nextBoolean();
 
+            // connect session with device(s)
+
+            // left arm
+            SessionReadsFromDevice sessionReadsFromDeviceLeft;
+            sessionReadsFromDeviceLeft = new SessionReadsFromDevice();
+            sessionReadsFromDeviceLeft.sessionId = session.sessionId;
+            sessionReadsFromDeviceLeft.deviceId = deviceLeft.deviceId;
+
+            // right arm
+            SessionReadsFromDevice sessionReadsFromDeviceRight;
+            sessionReadsFromDeviceRight = new SessionReadsFromDevice();
+            sessionReadsFromDeviceRight.sessionId = session.sessionId;
+            sessionReadsFromDeviceRight.deviceId = deviceRight.deviceId;
+
+            if (generateBoth) {
+                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceLeft);
+                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceRight);
+            } else if (generateLeft) {
+                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceLeft);
+            } else {
+                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceRight);
+            }
+
             // generate readings for each session
-            for (int j = 0; j < 800; j++) {
+            for (int j = 0; j < 100; j++) {
 
                 // insert the reading itself
                 // left limb
                 if (generateBoth || generateLeft) {
                     Reading reading = new Reading();
-                    reading.deviceId = device.deviceId;
-                    reading.sensorId = sensor.sensorId;
+                    reading.deviceId = deviceLeft.deviceId;
+                    reading.sensorId = sensorLeft.sensorId;
                     reading.sessionId = session.sessionId;
                     reading.time = currentTime;
                     reading.value = rand.nextDouble();
@@ -156,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
                 // right limb
                 if (generateBoth || !generateLeft) {
                     Reading reading1 = new Reading();
-                    reading1.deviceId = device1.deviceId;
-                    reading1.sensorId = sensor1.sensorId;
+                    reading1.deviceId = deviceRight.deviceId;
+                    reading1.sensorId = sensorRight.sensorId;
                     reading1.sessionId = session.sessionId;
                     reading1.time = currentTime;
                     reading1.value = rand.nextDouble();

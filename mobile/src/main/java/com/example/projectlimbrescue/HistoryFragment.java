@@ -19,8 +19,11 @@ import android.widget.TextView;
 
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
+import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.reading.Reading;
+import com.example.projectlimbrescue.db.reading.ReadingDao;
 import com.example.projectlimbrescue.db.session.SessionDao;
+import com.example.projectlimbrescue.db.session.SessionWithDevices;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 
@@ -41,7 +44,7 @@ public class HistoryFragment extends Fragment {
     private class HistoryHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView mSessionIDTextView;
         private TextView mDateTextView;
-        private SessionWithReadings mSession;
+        private SessionWithDevices mSession;
 
         public HistoryHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_history, parent, false));
@@ -51,10 +54,17 @@ public class HistoryFragment extends Fragment {
             mDateTextView = itemView.findViewById(R.id.history_date);
         }
 
-        public void bind(SessionWithReadings session) {
+        public void bind(SessionWithDevices session) {
             mSession = session;
-            String sessionText = "Session ID " + session.session.sessionId;
-            mSessionIDTextView.setText(sessionText);
+
+            String armText;
+            if (mSession.devices.size() > 1) {
+                armText = "Both limbs";
+            } else {
+                armText = mSession.devices.get(0).limb.toString();
+            }
+
+            mSessionIDTextView.setText(armText);
             String sessionDate = session.session.startTime.toString();
             mDateTextView.setText(sessionDate);
         }
@@ -62,15 +72,32 @@ public class HistoryFragment extends Fragment {
         // launch graph activity to display session
         @Override
         public void onClick(View v) {
+            // get a sessionWithReadings from database
+            long[] sessionID = {mSession.session.sessionId};
+
+            AppDatabase db = DatabaseSingleton.getInstance(getContext());
+            List<SessionWithReadings> sessionWithReadings = db.sessionDao()
+                    .getSessionsWithReadingsByIds(sessionID);
+
+            // TODO: ask Cole for getReadingsBySessionId() to simplify
+
+            // get the readings
+            List<Reading> readings = new LinkedList<>();
+            if (sessionWithReadings.size() > 0) {
+                readings.addAll(sessionWithReadings.get(0).readings);
+            }
+
+            // left limb x & y values
             List<Long> xValsLeft = new LinkedList<>();
             List<Double> yValsLeft = new LinkedList<>();
 
+            // right limb x & y values
             List<Long> xValsRight = new LinkedList<>();
             List<Double> yValsRight = new LinkedList<>();
 
             final long startTime = mSession.session.startTime.getTime();
             // put times into xVals
-            for (Reading r : mSession.readings) {
+            for (Reading r : readings) {
                 if (r.limb == ReadingLimb.LEFT_ARM) {
                     xValsLeft.add(r.time - startTime);
                     yValsLeft.add(r.value);
@@ -80,24 +107,29 @@ public class HistoryFragment extends Fragment {
                 }
             }
 
-            // convert to regular arrays to send to activity
+            /*
+                We have to convert the List<> into primitive arrays so we can pass them to
+                the activity
+             */
+
             long[] xLeft = new long[xValsLeft.size()];
             double[] yLeft = new double[yValsLeft.size()];
             long[] xRight = new long[xValsRight.size()];
             double[] yRight = new double[xValsRight.size()];
 
-            // left
+            // insert values into left arrays
             for (int i = 0; i < xValsLeft.size(); i++) {
                 xLeft[i] = xValsLeft.get(i);
                 yLeft[i] = yValsLeft.get(i);
             }
 
-            // right
+            // insert values into right arrays
             for (int i = 0; i < xValsRight.size(); i++) {
                 xRight[i] = xValsRight.get(i);
                 yRight[i] = yValsRight.get(i);
             }
 
+            // put arrays into intent
             Intent intent = new Intent(getContext(), GraphActivity.class);
             if (xLeft.length > 0) {
                 intent.putExtra(LEFT_X_VALUES, xLeft);
@@ -115,16 +147,40 @@ public class HistoryFragment extends Fragment {
 
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
         // all sessions
-        private List<SessionWithReadings> mAllSessions;
-        // sessions displayed, potentially filtered
-        private List<SessionWithReadings> mSessions;
-        // comparator used for sorting
-        private Comparator<SessionWithReadings> comparator;
-        // TODO: split up left/right sessions in constructor (when DB is updated)
+        private List<SessionWithDevices> mAllSessions;
+        // sessions from both limbs
+        private List<SessionWithDevices> mSessionsBoth;
+        // sessions from left limb
+        private List<SessionWithDevices> mSessionsLeft;
+        // sessions from right limb
+        private List<SessionWithDevices> mSessionsRight;
+        // sessions used by the adapter, will be one of the above lists
+        private List<SessionWithDevices> mSessions;
+        // used to sort sessions
+        Comparator<SessionWithDevices> mComparator;
 
-        public HistoryAdapter(List<SessionWithReadings> sessions) {
-            mAllSessions = sessions;
-            mSessions = new LinkedList<>(mAllSessions);
+        public HistoryAdapter(List<SessionWithDevices> allSessions) {
+            mAllSessions = allSessions;
+            mSessions = mAllSessions;
+
+            // pre-filter sessions
+            mSessionsBoth = new LinkedList<>();
+            mSessionsLeft = new LinkedList<>();
+            mSessionsRight = new LinkedList<>();
+
+            for (SessionWithDevices s : mAllSessions) {
+                List<Device> devices = s.devices;
+                if (devices.size() == 2) {
+                    mSessionsBoth.add(s);
+                } else if (devices.size() == 1) {
+                    if (devices.get(0).limb == ReadingLimb.LEFT_ARM) {
+                        mSessionsLeft.add(s);
+                    } else if (devices.get(0).limb == ReadingLimb.RIGHT_ARM) {
+                        mSessionsRight.add(s);
+                    }
+                }
+            }
+
             setSortDateMostRecent();
             sort();
         }
@@ -139,7 +195,7 @@ public class HistoryFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull HistoryHolder holder, int position) {
-            SessionWithReadings session = mSessions.get(position);
+            SessionWithDevices session = mSessions.get(position);
             holder.bind(session);
         }
 
@@ -152,17 +208,15 @@ public class HistoryFragment extends Fragment {
 
         // filters the list to only show sessions from one limb
         public void filterLimb(ReadingLimb limb) {
-            mSessions = new LinkedList<>(mAllSessions);
-            // going backwards means we can delete without skipping elements
-            for (int i = mSessions.size() - 1; i >= 0; i--) {
-                // if a session contains a reading from the other limb, remove it
-                List<Reading> readings = mSessions.get(i).readings;
-                for (Reading r : readings) {
-                    if (r.limb != limb) {
-                        mSessions.remove(i);
-                        break;
-                    }
-                }
+            switch (limb) {
+                case LEFT_ARM:
+                    mSessions = mSessionsLeft;
+                    break;
+                case RIGHT_ARM:
+                    mSessions = mSessionsRight;
+                    break;
+                default:
+                    break;
             }
 
             sort();
@@ -171,32 +225,7 @@ public class HistoryFragment extends Fragment {
         }
 
         public void filterBothLimbs() {
-            mSessions = new LinkedList<>(mAllSessions);
-            // going backwards means we can delete without skipping elements
-            for (int i = mSessions.size() - 1; i >= 0; i--) {
-                // keep the session if it has both left and right limb readings
-                List<Reading> readings = mSessions.get(i).readings;
-                boolean hasLeft = false;
-                boolean hasRight = false;
-                for (Reading r : readings) {
-                    if (r.limb == ReadingLimb.LEFT_ARM) {
-                        hasLeft = true;
-                    }
-                    if (r.limb == ReadingLimb.RIGHT_ARM) {
-                        hasRight = true;
-                    }
-                    // if it has both we keep this and go to the next session
-                    if (hasLeft && hasRight) {
-                        break;
-                    }
-                }
-
-                // if it's missing a limb we throw it out
-                if (!hasLeft || !hasRight) {
-                    mSessions.remove(i);
-                }
-            }
-
+            mSessions = mSessionsBoth;
             sort();
             // let adapter know data changed to adjust UI
             notifyDataSetChanged();
@@ -211,15 +240,15 @@ public class HistoryFragment extends Fragment {
         }
 
         private void setSortDateMostRecent() {
-            comparator = (o1, o2) -> o2.session.startTime.compareTo(o1.session.startTime);
+            mComparator = (o1, o2) -> o2.session.startTime.compareTo(o1.session.startTime);
         }
 
         private void setSortDateEarliest() {
-            comparator = (o1, o2) -> o1.session.startTime.compareTo(o2.session.startTime);
+            mComparator = (o1, o2) -> o1.session.startTime.compareTo(o2.session.startTime);
         }
 
         public void sort() {
-            Collections.sort(mSessions, comparator);
+            Collections.sort(mSessions, mComparator);
         }
     }
 
@@ -266,6 +295,7 @@ public class HistoryFragment extends Fragment {
                         mAdapter.filterNone();
                         break;
                     case 1:
+                        // both limbs
                         mAdapter.filterBothLimbs();
                         break;
                     case 2:
@@ -296,11 +326,13 @@ public class HistoryFragment extends Fragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
+                        // sort by most recent date first
                         mAdapter.setSortDateMostRecent();
                         mAdapter.sort();
                         mAdapter.notifyDataSetChanged();
                         break;
                     case 1:
+                        // sort by earliest date first
                         mAdapter.setSortDateEarliest();
                         mAdapter.sort();
                         mAdapter.notifyDataSetChanged();
@@ -324,13 +356,7 @@ public class HistoryFragment extends Fragment {
     private void updateUI() {
         db = DatabaseSingleton.getInstance(getContext());
         SessionDao sessionDao = db.sessionDao();
-        List<SessionWithReadings> sessions = sessionDao.getSessionsWithReadings();
-
-        // sort sessions by most recent before giving it to the adapter
-        //Collections.sort(sessions,
-                //(o1, o2) -> o2.session.startTime.compareTo(o1.session.startTime));
-
-        // TODO: get sensors and readings, look at limbs in sensors
+        List<SessionWithDevices> sessions = sessionDao.getSessionsWithDevices();
 
         mAdapter = new HistoryAdapter(sessions);
         mHistoryRecyclerView.setAdapter(mAdapter);

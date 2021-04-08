@@ -39,6 +39,11 @@ public class GraphActivity extends AppCompatActivity {
 
         PanZoom.attach(mPlot);
 
+        /*
+            We can't use primitive arrays to create an XYSeries and there's no easy
+            way to convert them so we have to do this
+         */
+
         // turn the above arrays into XYSeries
         XYSeries rightLimb = null;
         if (xRight != null) {

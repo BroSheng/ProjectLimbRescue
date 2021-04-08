@@ -204,8 +204,6 @@ public class HistoryFragment extends Fragment {
             return mSessions.size();
         }
 
-        // TODO: use getSessionWithDevices and use limb field there
-
         // filters the list to only show sessions from one limb
         public void filterLimb(ReadingLimb limb) {
             switch (limb) {

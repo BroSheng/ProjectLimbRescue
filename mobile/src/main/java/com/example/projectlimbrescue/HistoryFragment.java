@@ -26,12 +26,17 @@ import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithDevices;
 import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class HistoryFragment extends Fragment {
 
@@ -72,74 +77,88 @@ public class HistoryFragment extends Fragment {
         // launch graph activity to display session
         @Override
         public void onClick(View v) {
-            // get a sessionWithReadings from database
-            long[] sessionID = {mSession.session.sessionId};
-
-            AppDatabase db = DatabaseSingleton.getInstance(getContext());
-            List<SessionWithReadings> sessionWithReadings = db.sessionDao()
-                    .getSessionsWithReadingsByIds(sessionID);
-
-            // TODO: ask Cole for getReadingsBySessionId() to simplify
-
-            // get the readings
-            List<Reading> readings = new LinkedList<>();
-            if (sessionWithReadings.size() > 0) {
-                readings.addAll(sessionWithReadings.get(0).readings);
-            }
-
-            // left limb x & y values
-            List<Long> xValsLeft = new LinkedList<>();
-            List<Double> yValsLeft = new LinkedList<>();
-
-            // right limb x & y values
-            List<Long> xValsRight = new LinkedList<>();
-            List<Double> yValsRight = new LinkedList<>();
-
-            final long startTime = mSession.session.startTime.getTime();
-            // put times into xVals
-            for (Reading r : readings) {
-                if (r.limb == ReadingLimb.LEFT_ARM) {
-                    xValsLeft.add(r.time - startTime);
-                    yValsLeft.add(r.value);
-                } else {
-                    xValsRight.add(r.time - startTime);
-                    yValsRight.add(r.value);
-                }
-            }
-
-            /*
-                We have to convert the List<> into primitive arrays so we can pass them to
-                the activity
-             */
-
-            long[] xLeft = new long[xValsLeft.size()];
-            double[] yLeft = new double[yValsLeft.size()];
-            long[] xRight = new long[xValsRight.size()];
-            double[] yRight = new double[xValsRight.size()];
-
-            // insert values into left arrays
-            for (int i = 0; i < xValsLeft.size(); i++) {
-                xLeft[i] = xValsLeft.get(i);
-                yLeft[i] = yValsLeft.get(i);
-            }
-
-            // insert values into right arrays
-            for (int i = 0; i < xValsRight.size(); i++) {
-                xRight[i] = xValsRight.get(i);
-                yRight[i] = yValsRight.get(i);
-            }
-
-            // put arrays into intent
-            Intent intent = new Intent(getContext(), GraphActivity.class);
-            if (xLeft.length > 0) {
-                intent.putExtra(LEFT_X_VALUES, xLeft);
-                intent.putExtra(LEFT_Y_VALUES, yLeft);
-            }
-            if (xRight.length > 0) {
-                intent.putExtra(RIGHT_X_VALUES, xRight);
-                intent.putExtra(RIGHT_Y_VALUES, yRight);
-            }
+            Intent intent = new Intent(getContext(), DataAnalysisActivity.class);
+            intent.putExtra("SESSION_ID", mSession.session.sessionId);
             startActivity(intent);
+
+            // get a sessionWithReadings from database
+//            long[] sessionID = {mSession.session.sessionId};
+//
+//            AppDatabase db = DatabaseSingleton.getInstance(getContext());
+//            ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+//
+//            ListenableFuture<List<SessionWithReadings>> sessionWithReadingsFuture = db.sessionDao()
+//                    .getSessionsWithReadingsByIds(sessionID);
+//            sessionWithReadingsFuture.addListener(() -> {
+//                List<SessionWithReadings> sessionWithReadings = null;
+//                try {
+//                    sessionWithReadings = sessionWithReadingsFuture.get();
+//                } catch (ExecutionException | InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                // TODO: ask Cole for getReadingsBySessionId() to simplify
+//
+//                // get the readings
+//                List<Reading> readings = new LinkedList<>();
+//                if (sessionWithReadings.size() > 0) {
+//                    readings.addAll(sessionWithReadings.get(0).readings);
+//                }
+//
+//                // left limb x & y values
+//                List<Long> xValsLeft = new LinkedList<>();
+//                List<Double> yValsLeft = new LinkedList<>();
+//
+//                // right limb x & y values
+//                List<Long> xValsRight = new LinkedList<>();
+//                List<Double> yValsRight = new LinkedList<>();
+//
+//                final long startTime = mSession.session.startTime.getTime();
+//                // put times into xVals
+//                for (Reading r : readings) {
+//                    if (r.limb == ReadingLimb.LEFT_ARM) {
+//                        xValsLeft.add(r.time - startTime);
+//                        yValsLeft.add(r.value);
+//                    } else {
+//                        xValsRight.add(r.time - startTime);
+//                        yValsRight.add(r.value);
+//                    }
+//                }
+//
+//            /*
+//                We have to convert the List<> into primitive arrays so we can pass them to
+//                the activity
+//             */
+//
+//                long[] xLeft = new long[xValsLeft.size()];
+//                double[] yLeft = new double[yValsLeft.size()];
+//                long[] xRight = new long[xValsRight.size()];
+//                double[] yRight = new double[xValsRight.size()];
+//
+//                // insert values into left arrays
+//                for (int i = 0; i < xValsLeft.size(); i++) {
+//                    xLeft[i] = xValsLeft.get(i);
+//                    yLeft[i] = yValsLeft.get(i);
+//                }
+//
+//                // insert values into right arrays
+//                for (int i = 0; i < xValsRight.size(); i++) {
+//                    xRight[i] = xValsRight.get(i);
+//                    yRight[i] = yValsRight.get(i);
+//                }
+//
+//                // put arrays into intent
+//                Intent intent = new Intent(getContext(), GraphActivity.class);
+//                if (xLeft.length > 0) {
+//                    intent.putExtra(LEFT_X_VALUES, xLeft);
+//                    intent.putExtra(LEFT_Y_VALUES, yLeft);
+//                }
+//                if (xRight.length > 0) {
+//                    intent.putExtra(RIGHT_X_VALUES, xRight);
+//                    intent.putExtra(RIGHT_Y_VALUES, yRight);
+//                }
+//                startActivity(intent);
+//            }, service);
         }
     }
 
@@ -354,10 +373,19 @@ public class HistoryFragment extends Fragment {
     private void updateUI() {
         db = DatabaseSingleton.getInstance(getContext());
         SessionDao sessionDao = db.sessionDao();
-        List<SessionWithDevices> sessions = sessionDao.getSessionsWithDevices();
-
-        mAdapter = new HistoryAdapter(sessions);
-        mHistoryRecyclerView.setAdapter(mAdapter);
+        ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+        ListenableFuture<List<SessionWithDevices>> sessionsFuture = sessionDao.getSessionsWithDevices();
+        sessionsFuture.addListener(() -> {
+            try {
+                List<SessionWithDevices> sessions = sessionsFuture.get();
+                this.getActivity().runOnUiThread(() -> {
+                    mAdapter = new HistoryAdapter(sessions);
+                    mHistoryRecyclerView.setAdapter(mAdapter);
+                });
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, service);
     }
 
 }

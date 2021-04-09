@@ -34,6 +34,9 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,6 +51,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 
 public class ReadingsFragment extends Fragment implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
@@ -245,18 +249,29 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             session.startTime = new Timestamp(startTime);
             session.endTime = new Timestamp(endTime);
 
-            long sessionId = sessionAccess.insert(session)[0];
-            for(JSONObject obj : readingSessions) {
+            ListeningExecutorService service =
+                    MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
+            ListenableFuture<long[]> sessionIdFuture = sessionAccess.insert(session);
+            sessionIdFuture.addListener(() -> {
+                long sessionId = 0;
                 try {
-                    JsonToDb.InsertJson(obj, sessionId, db);
-                } catch (JSONException e) {
+                    sessionId = sessionIdFuture.get()[0];
+                } catch (ExecutionException | InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
 
-            Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
-            intent.putExtra("SESSION_ID", sessionId);
-            startActivity(intent);
+                for(JSONObject obj : readingSessions) {
+                    try {
+                        JsonToDb.InsertJson(obj, sessionId, db);
+                    } catch (JSONException | InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
+                intent.putExtra("SESSION_ID", sessionId);
+                startActivity(intent);
+                }, service);
         }
     }
 }

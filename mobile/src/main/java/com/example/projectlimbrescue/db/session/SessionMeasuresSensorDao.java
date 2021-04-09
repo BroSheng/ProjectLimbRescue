@@ -4,6 +4,8 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 /*
 Data access object for the SessionMeasuresSensor relationship. Contains only insert and delete methods.
  */
@@ -12,8 +14,8 @@ Data access object for the SessionMeasuresSensor relationship. Contains only ins
 public interface SessionMeasuresSensorDao {
 
     @Insert
-    void insert(SessionMeasuresSensor... sessionsMeasuringSensors);
+    ListenableFuture<long[]> insert(SessionMeasuresSensor... sessionsMeasuringSensors);
 
     @Delete
-    void delete(SessionMeasuresSensor sessionMeasuringSensor);
+    ListenableFuture<Integer> delete(SessionMeasuresSensor sessionMeasuringSensor);
 }

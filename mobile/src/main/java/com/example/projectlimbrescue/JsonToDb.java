@@ -45,6 +45,7 @@ import com.example.shared.SensorDesc;
 import org.json.*;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class JsonToDb {
     /*
@@ -72,7 +73,7 @@ public class JsonToDb {
                 - value: the JsonObject's 'value'
                 - limb: the limb initially stored
      */
-    public static void InsertJson(JSONObject json, long sessionId, AppDatabase db) throws org.json.JSONException {
+    public static void InsertJson(JSONObject json, long sessionId, AppDatabase db) throws org.json.JSONException, ExecutionException, InterruptedException {
         // Set up database DAOs
         DeviceDao deviceDao = db.deviceDao();
         DeviceContainsSensorDao deviceContainsSensorDao = db.deviceContainsSensorDao();
@@ -86,17 +87,16 @@ public class JsonToDb {
         DeviceDesc deviceDesc = DeviceDesc.valueOf(json.getString("desc"));
 
         long deviceId;
-        List<Device> devicesWithDesc = deviceDao.getDevicesByDesc(deviceDesc);
+        List<Device> devicesWithDesc = deviceDao.getDevicesByDesc(deviceDesc).get();
         if (devicesWithDesc.size() == 0) { // no device with desc yet exists
             Device device = new Device();
             device.desc = deviceDesc;
-            device.limb = limb;
-            deviceId = deviceDao.insert(device)[0];
+            deviceId = deviceDao.insert(device).get()[0];
         } else {
             deviceId = devicesWithDesc.get(0).deviceId;
         }
 
-        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get(0);
+        SessionWithDevices sessionWithDevices = sessionDao.getSessionsWithDevicesByIds(new long[]{sessionId}).get().get(0);
         boolean foundDevice = false;
         for (Device device : sessionWithDevices.devices) {
             if (device.deviceId == deviceId) {
@@ -117,16 +117,16 @@ public class JsonToDb {
             SensorDesc sensorDesc = SensorDesc.valueOf(jsonSensor.getString("desc"));
 
             long sensorId;
-            List<Sensor> sensorsWithDesc = sensorDao.getSensorsByDesc(sensorDesc);
+            List<Sensor> sensorsWithDesc = sensorDao.getSensorsByDesc(sensorDesc).get();
             if (sensorsWithDesc.size() == 0) { // no sensor with desc yet exists
                 Sensor sensor = new Sensor();
                 sensor.desc = sensorDesc;
-                sensorId = sensorDao.insert(sensor)[0];
+                sensorId = sensorDao.insert(sensor).get()[0];
             } else {
                 sensorId = sensorsWithDesc.get(0).sensorId;
             }
 
-            DeviceWithSensors deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{deviceId}).get(0);
+            DeviceWithSensors deviceWithSensors = deviceDao.getDevicesWithSensorsByIds(new long[]{deviceId}).get().get(0);
             boolean foundSensor = false;
             for (Sensor sensor : deviceWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {
@@ -141,7 +141,7 @@ public class JsonToDb {
                 deviceContainsSensorDao.insert(deviceContainsSensor);
             }
 
-            SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get(0);
+            SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get().get(0);
             foundSensor = false;
             for (Sensor sensor : sessionWithSensors.sensors) {
                 if (sensor.sensorId == sensorId) {

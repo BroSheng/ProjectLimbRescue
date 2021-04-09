@@ -7,6 +7,7 @@ import androidx.room.Query;
 import androidx.room.Transaction;
 
 import com.example.shared.DeviceDesc;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
 
@@ -18,39 +19,39 @@ Data access object for the Device entity, providing the methods used to query th
 public interface DeviceDao {
     // Simple "placeholder" methods for now; add more in as functionality or testing requires
     @Query("SELECT * FROM Device")
-    List<Device> getDevices();
+    ListenableFuture<List<Device>> getDevices();
 
     @Transaction
     @Query("SELECT * FROM Device")
-    List<DeviceWithReadings> getDevicesWithReadings();
+    ListenableFuture<List<DeviceWithReadings>> getDevicesWithReadings();
 
     @Transaction
     @Query("SELECT * FROM Device")
-    List<DeviceWithSensors> getDevicesWithSensors();
+    ListenableFuture<List<DeviceWithSensors>> getDevicesWithSensors();
 
     @Transaction
     @Query("SELECT * FROM Device")
-    List<DeviceWithSessions> getDevicesWithSessions();
+    ListenableFuture<List<DeviceWithSessions>> getDevicesWithSessions();
 
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<Device> getDevicesByIds(int[] ids);
+    ListenableFuture<List<Device>> getDevicesByIds(int[] ids);
 
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithReadings> getDevicesWithReadingsByIds(long[] ids);
+    ListenableFuture<List<DeviceWithReadings>> getDevicesWithReadingsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithSensors> getDevicesWithSensorsByIds(long[] ids);
+    ListenableFuture<List<DeviceWithSensors>> getDevicesWithSensorsByIds(long[] ids);
     @Transaction
     @Query("SELECT * FROM Device WHERE device_id IN (:ids)")
-    List<DeviceWithSessions> getDevicesWithSessionsByIds(long[] ids);
+    ListenableFuture<List<DeviceWithSessions>> getDevicesWithSessionsByIds(long[] ids);
 
     @Query("SELECT * FROM Device WHERE `desc` = :desc")
-    List<Device> getDevicesByDesc (DeviceDesc desc);
+    ListenableFuture<List<Device>> getDevicesByDesc (DeviceDesc desc);
 
     @Insert
-    long[] insert(Device... devices);
+    ListenableFuture<long[]> insert(Device... devices);
 
     @Delete
-    void delete(Device device);
+    ListenableFuture<Integer> delete(Device device);
 }

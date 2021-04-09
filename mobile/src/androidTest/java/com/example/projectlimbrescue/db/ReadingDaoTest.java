@@ -62,18 +62,17 @@ public class ReadingDaoTest {
         session.sessionId = 456;
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        sessionDao.insert(session);
+        sessionDao.insert(session).get();
 
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        device.limb = ReadingLimb.LEFT_ARM;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 012;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading = new Reading();
@@ -85,8 +84,8 @@ public class ReadingDaoTest {
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
-        readingDao.insert(reading);
-        List<Reading> readings = readingDao.getReadings();
+        readingDao.insert(reading).get();
+        List<Reading> readings = readingDao.getReadings().get();
 
         DbTestUtils.assertReadingEquals(reading, readings.get(0));
     }
@@ -98,18 +97,17 @@ public class ReadingDaoTest {
         session.sessionId = 456;
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        sessionDao.insert(session);
+        sessionDao.insert(session).get();
 
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        device.limb = ReadingLimb.LEFT_ARM;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 012;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading = new Reading();
@@ -121,8 +119,8 @@ public class ReadingDaoTest {
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
-        readingDao.insert(reading);
-        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123});
+        readingDao.insert(reading).get();
+        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123}).get();
 
         DbTestUtils.assertReadingEquals(reading, readings.get(0));
     }
@@ -134,18 +132,17 @@ public class ReadingDaoTest {
         session.sessionId = 456;
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        sessionDao.insert(session);
+        sessionDao.insert(session).get();
 
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        device.limb = ReadingLimb.LEFT_ARM;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 012;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading1 = new Reading();
@@ -166,9 +163,9 @@ public class ReadingDaoTest {
         reading2.value = 789.012f;
         reading2.limb = ReadingLimb.RIGHT_ARM;
 
-        readingDao.insert(reading1);
-        readingDao.insert(reading2);
-        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123, 234});
+        readingDao.insert(reading1).get();
+        readingDao.insert(reading2).get();
+        List<Reading> readings = readingDao.getReadingsByIds(new long[]{123, 234}).get();
 
         DbTestUtils.assertReadingEquals(reading1, readings.get(0));
         DbTestUtils.assertReadingEquals(reading2, readings.get(1));
@@ -181,19 +178,17 @@ public class ReadingDaoTest {
         session.sessionId = 456;
         session.startTime = new Timestamp(1000);
         session.endTime = new Timestamp(2000);
-        sessionDao.insert(session);
+        sessionDao.insert(session).get();
 
         Device device = new Device();
         device.deviceId = 789;
         device.desc = DeviceDesc.FOSSIL_GEN_5;
-        device.limb = ReadingLimb.LEFT_ARM;
-        device.limb = ReadingLimb.LEFT_ARM;
-        deviceDao.insert(device);
+        deviceDao.insert(device).get();
 
         Sensor sensor = new Sensor();
         sensor.sensorId = 012;
         sensor.desc = SensorDesc.PPG;
-        sensorDao.insert(sensor);
+        sensorDao.insert(sensor).get();
 
         // insert the reading itself
         Reading reading = new Reading();
@@ -205,10 +200,10 @@ public class ReadingDaoTest {
         reading.value = 123.456f;
         reading.limb = ReadingLimb.LEFT_ARM;
 
-        readingDao.insert(reading);
-        readingDao.delete(reading);
+        readingDao.insert(reading).get();
+        readingDao.delete(reading).get();
 
-        List<Reading> readings = readingDao.getReadings();
+        List<Reading> readings = readingDao.getReadings().get();
 
         assertEquals(readings.size(), 0);
     }

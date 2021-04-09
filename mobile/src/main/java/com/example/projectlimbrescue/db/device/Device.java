@@ -5,11 +5,13 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import com.example.shared.DeviceDesc;
+import com.example.shared.ReadingLimb;
 
 /*
 A device is a type of smart technology, such as a smartwatch or smart scale,
 that contains one or more sensors. One ‘device’ entry refers to a type of device,
-rather than a single particular watch or scale.
+rather than a single particular watch or scale, although it does specify a device placed on a specific
+limb or combination of limbs.
  */
 
 @Entity

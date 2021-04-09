@@ -265,7 +265,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                 Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
                 intent.putExtra("SESSION_ID", sessionId);
                 startActivity(intent);
-                }, service);
+            }, service);
         }
     }
 }

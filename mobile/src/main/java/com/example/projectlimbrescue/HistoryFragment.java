@@ -59,16 +59,20 @@ public class HistoryFragment extends Fragment {
             mSession = session;
 
             String armText = "";
-            if (mSession.devices.size() > 1) {
-                armText = "Both limbs";
-            } else {
-                try {
-                    List<Reading> readings = db.readingDao().getReadingsForSessionIdAndLimb(mSession.session.sessionId,
-                            ReadingLimb.LEFT_ARM).get();
-                    armText = readings.size() > 0 ? ReadingLimb.LEFT_ARM.toString() : ReadingLimb.RIGHT_ARM.toString();
-                } catch (ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
+            try {
+                List<Reading> leftReadings = db.readingDao().getReadingsForSessionIdAndLimb(mSession.session.sessionId,
+                        ReadingLimb.LEFT_ARM).get();
+                List<Reading> rightReadings = db.readingDao().getReadingsForSessionIdAndLimb(mSession.session.sessionId,
+                        ReadingLimb.RIGHT_ARM).get();
+                if(leftReadings.size() > 0 && rightReadings.size() > 0) {
+                    armText = "Both limbs";
+                } else if (leftReadings.size() > 0) {
+                    armText = ReadingLimb.LEFT_ARM.toString();
+                } else {
+                    armText = ReadingLimb.RIGHT_ARM.toString();
                 }
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
             }
 
             mSessionIDTextView.setText(armText);
@@ -111,21 +115,20 @@ public class HistoryFragment extends Fragment {
             mSessionsRight = new LinkedList<>();
 
             for (SessionWithDevices s : mAllSessions) {
-                List<Device> devices = s.devices;
-                if (devices.size() == 2) {
-                    mSessionsBoth.add(s);
-                } else if (devices.size() == 1) {
-                    try {
-                        List<Reading> readings = db.readingDao().getReadingsForSessionIdAndLimb(s.session.sessionId,
-                                ReadingLimb.LEFT_ARM).get();
-                        if (readings.size() > 0) {
-                            mSessionsLeft.add(s);
-                        } else {
-                            mSessionsRight.add(s);
-                        }
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
+                try {
+                    List<Reading> leftReadings = db.readingDao().getReadingsForSessionIdAndLimb(s.session.sessionId,
+                            ReadingLimb.LEFT_ARM).get();
+                    List<Reading> rightReadings = db.readingDao().getReadingsForSessionIdAndLimb(s.session.sessionId,
+                            ReadingLimb.RIGHT_ARM).get();
+                    if(leftReadings.size() > 0 && rightReadings.size() > 0) {
+                        mSessionsBoth.add(s);
+                    } else if (leftReadings.size() > 0) {
+                        mSessionsLeft.add(s);
+                    } else {
+                        mSessionsRight.add(s);
                     }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
 

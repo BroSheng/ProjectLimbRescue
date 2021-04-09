@@ -10,5 +10,9 @@ public enum ReadingLimb {
         public String toString() {
             return "Right Arm";
         }
+    };
+
+    static public ReadingLimb getEnum(String val) {
+        return valueOf(val.replace(' ', '_').toUpperCase());
     }
 }

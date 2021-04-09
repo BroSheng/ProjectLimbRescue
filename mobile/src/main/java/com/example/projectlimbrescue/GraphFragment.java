@@ -19,11 +19,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link GraphFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class GraphFragment extends Fragment {
 
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -44,23 +39,6 @@ public class GraphFragment extends Fragment {
 
     public GraphFragment() {
         // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment GraphFragment.
-     */
-    public static GraphFragment newInstance(String rightX, String rightY, String leftX, String leftY) {
-        GraphFragment fragment = new GraphFragment();
-        Bundle args = new Bundle();
-        args.putString(RIGHT_LIMB_X, rightX);
-        args.putString(RIGHT_LIMB_Y, rightY);
-        args.putString(LEFT_LIMB_X, leftX);
-        args.putString(LEFT_LIMB_Y, leftY);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     @Override
@@ -114,21 +92,17 @@ public class GraphFragment extends Fragment {
         // and configure them from xml:
         LineAndPointFormatter leftLimbFormat =
                 new LineAndPointFormatter(getContext(), R.xml.line_point_formatter);
-        leftLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(2,
-                CatmullRomInterpolator.Type.Centripetal));
 
         LineAndPointFormatter rightLimbFormat = new LineAndPointFormatter(getContext(),
                 R.xml.right_limb_point_formatter);
-        rightLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(2,
-                CatmullRomInterpolator.Type.Centripetal));
 
         // add a new series' to the xyplot:
         plot.addSeries(rightLimb, rightLimbFormat);
         plot.addSeries(leftLimb, leftLimbFormat);
 
         // display more decimals on range
-        plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT)
-                .setFormat(new DecimalFormat("0.000"));
+        plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT);
+
 
         return v;
     }

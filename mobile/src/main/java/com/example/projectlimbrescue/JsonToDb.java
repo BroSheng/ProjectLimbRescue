@@ -83,7 +83,7 @@ public class JsonToDb {
         SessionMeasuresSensorDao sessionMeasuresSensorDao = db.sessionMeasuresSensorDao();
         SessionReadsFromDeviceDao sessionReadsFromDeviceDao = db.sessionReadsFromDeviceDao();
 
-        ReadingLimb limb = ReadingLimb.valueOf(json.getString("limb"));
+        ReadingLimb limb = ReadingLimb.getEnum(json.getString("limb"));
         DeviceDesc deviceDesc = DeviceDesc.valueOf(json.getString("desc"));
 
         long deviceId;
@@ -138,7 +138,7 @@ public class JsonToDb {
                 DeviceContainsSensor deviceContainsSensor = new DeviceContainsSensor();
                 deviceContainsSensor.deviceId = deviceId;
                 deviceContainsSensor.sensorId = sensorId;
-                deviceContainsSensorDao.insert(deviceContainsSensor);
+                deviceContainsSensorDao.insert(deviceContainsSensor).get();
             }
 
             SessionWithSensors sessionWithSensors = sessionDao.getSessionsWithSensorsByIds(new long[]{sessionId}).get().get(0);
@@ -153,7 +153,7 @@ public class JsonToDb {
                 SessionMeasuresSensor sessionMeasuresSensor = new SessionMeasuresSensor();
                 sessionMeasuresSensor.sessionId = sessionId;
                 sessionMeasuresSensor.sensorId = sensorId;
-                sessionMeasuresSensorDao.insert(sessionMeasuresSensor);
+                sessionMeasuresSensorDao.insert(sessionMeasuresSensor).get();
             }
 
             JSONArray jsonReadings = jsonSensor.getJSONArray("readings");
@@ -168,7 +168,7 @@ public class JsonToDb {
                 reading.value = jsonReading.getDouble("value");
                 reading.limb = limb;
 
-                readingDao.insert(reading);
+                readingDao.insert(reading).get();
             }
         }
     }

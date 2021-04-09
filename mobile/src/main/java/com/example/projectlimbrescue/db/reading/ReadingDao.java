@@ -5,6 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
+import com.example.shared.ReadingLimb;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
@@ -21,6 +22,9 @@ public interface ReadingDao {
 
     @Query("SELECT * FROM Reading WHERE reading_id IN (:ids)")
     ListenableFuture<List<Reading>> getReadingsByIds(long[] ids);
+
+    @Query(("SELECT * FROM Reading WHERE Reading.session_id = (:id) AND Reading.limb = (:limb)"))
+    ListenableFuture<List<Reading>> getReadingsForSessionIdAndLimb(long id, ReadingLimb limb);
 
     @Insert
     ListenableFuture<long[]> insert(Reading... readings);

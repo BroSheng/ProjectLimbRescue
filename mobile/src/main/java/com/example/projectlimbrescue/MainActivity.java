@@ -74,131 +74,12 @@ import java.util.concurrent.ExecutionException;
 
 public class MainActivity extends AppCompatActivity {
 
-    BottomNavigationView mNavigation;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /* -------------------- BEGIN DB INSERTION -------------------- */
-        AppDatabase db = DatabaseSingleton.getInstance(getBaseContext());
-
-        // put data into db
-        SessionDao sessionDao = db.sessionDao();
-        SensorDao sensorDao = db.sensorDao();
-        DeviceDao deviceDao = db.deviceDao();
-        ReadingDao readingDao = db.readingDao();
-        SessionReadsFromDeviceDao sessionReadsFromDeviceDao = db.sessionReadsFromDeviceDao();
-
-        // create valid entities for reading foreign keys
-        Device deviceLeft = new Device();
-        deviceLeft.deviceId = 123;
-        deviceLeft.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceLeft.limb = ReadingLimb.LEFT_ARM;
-        deviceDao.insert(deviceLeft);
-
-        Sensor sensorLeft = new Sensor();
-        sensorLeft.sensorId = 321;
-        sensorLeft.desc = SensorDesc.PPG;
-        sensorDao.insert(sensorLeft);
-
-        // create valid entities for reading foreign keys
-        Device deviceRight = new Device();
-        deviceRight.deviceId = 456;
-        deviceRight.desc = DeviceDesc.FOSSIL_GEN_5;
-        deviceRight.limb = ReadingLimb.RIGHT_ARM;
-        deviceDao.insert(deviceRight);
-
-        Sensor sensorRight = new Sensor();
-        sensorRight.sensorId = 654;
-        sensorRight.desc = SensorDesc.PPG;
-        sensorDao.insert(sensorRight);
-
-        // keeps track of used IDs so we don't repeat them
-        List<Integer> sessionIDs = new LinkedList<>();
-
-        Random rand = new Random();
-        // randomly generate sessions
-        for (int i = 0; i < 10; i++) {
-            Session session = new Session();
-            int id;
-            do {
-                id = rand.nextInt(10000);
-            } while (sessionIDs.contains(id));
-            session.sessionId = id;
-            sessionIDs.add(id);
-            long time = 1609477200000L;    // 03/05/2021 in UNIX time (ms)
-            long start = time + rand.nextInt(947720000);
-            session.startTime = new Timestamp(start);
-            // add 30 seconds to start time go get end time
-            session.endTime = new Timestamp(start + 30000);
-            sessionDao.insert(session);
-
-            List<Reading> readings = new ArrayList<>();
-
-            long currentTime = start;
-            boolean generateBoth = rand.nextBoolean();
-            boolean generateLeft = rand.nextBoolean();
-
-            // connect session with device(s)
-
-            // left arm
-            SessionReadsFromDevice sessionReadsFromDeviceLeft;
-            sessionReadsFromDeviceLeft = new SessionReadsFromDevice();
-            sessionReadsFromDeviceLeft.sessionId = session.sessionId;
-            sessionReadsFromDeviceLeft.deviceId = deviceLeft.deviceId;
-
-            // right arm
-            SessionReadsFromDevice sessionReadsFromDeviceRight;
-            sessionReadsFromDeviceRight = new SessionReadsFromDevice();
-            sessionReadsFromDeviceRight.sessionId = session.sessionId;
-            sessionReadsFromDeviceRight.deviceId = deviceRight.deviceId;
-
-            if (generateBoth) {
-                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceLeft);
-                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceRight);
-            } else if (generateLeft) {
-                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceLeft);
-            } else {
-                sessionReadsFromDeviceDao.insert(sessionReadsFromDeviceRight);
-            }
-
-            // generate readings for each session
-            for (int j = 0; j < 100; j++) {
-
-                // insert the reading itself
-                // left limb
-                if (generateBoth || generateLeft) {
-                    Reading reading = new Reading();
-                    reading.deviceId = deviceLeft.deviceId;
-                    reading.sensorId = sensorLeft.sensorId;
-                    reading.sessionId = session.sessionId;
-                    reading.time = currentTime;
-                    reading.value = rand.nextDouble();
-                    reading.limb = ReadingLimb.LEFT_ARM;
-                    readingDao.insert(reading);
-                }
-
-                // right limb
-                if (generateBoth || !generateLeft) {
-                    Reading reading1 = new Reading();
-                    reading1.deviceId = deviceRight.deviceId;
-                    reading1.sensorId = sensorRight.sensorId;
-                    reading1.sessionId = session.sessionId;
-                    reading1.time = currentTime;
-                    reading1.value = rand.nextDouble();
-                    reading1.limb = ReadingLimb.RIGHT_ARM;
-                    readingDao.insert(reading1);
-                }
-
-                // increment time by 33 ms to maintain 30hz
-                currentTime += 33;
-            }
-        }
-        /* -------------------- END DB INSERTION -------------------- */
-
-        mNavigation = findViewById(R.id.bottom_navigation);
+        BottomNavigationView navigation = findViewById(R.id.bottom_navigation);
 
         // initialize fragment
         FragmentManager fm = getSupportFragmentManager();
@@ -212,27 +93,29 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // set up onclick listener for navigation view
-        mNavigation.setOnNavigationItemSelectedListener(
-                item -> {
-                    switch (item.getItemId()) {
-                        case R.id.action_readings:
-                            fm.beginTransaction()
-                                    .replace(R.id.fragment_container_view, ReadingsFragment.class, null)
-                                    .commit();
-                            break;
-                        case R.id.action_history:
-                            fm.beginTransaction()
-                                    .replace(R.id.fragment_container_view, HistoryFragment.class, null)
-                                    .commit();
-                            break;
-                        case R.id.action_settings:
-                            // TODO create settings fragment
-                            break;
-                        default:
-                            break;
-                    }
-                    return true;
-                });
+        navigation.setOnNavigationItemSelectedListener(
+            item -> {
+                switch (item.getItemId()) {
+                    case R.id.action_readings:
+                        fm.beginTransaction()
+                                .replace(R.id.fragment_container_view, ReadingsFragment.class, null)
+                                .commit();
+                        break;
+                    case R.id.action_history:
+                        fm.beginTransaction()
+                                .replace(R.id.fragment_container_view, HistoryFragment.class, null)
+                                .commit();
+                        break;
+                    case R.id.action_settings:
+                        fm.beginTransaction()
+                                .replace(R.id.fragment_container_view, SettingsFragment.class, null)
+                                .commit();
+                        break;
+                    default:
+                        break;
+                }
+                return true;
+            });
     }
 
 }

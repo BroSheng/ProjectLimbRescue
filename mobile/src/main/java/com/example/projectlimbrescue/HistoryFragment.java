@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,17 +20,14 @@ import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
 import com.example.projectlimbrescue.db.device.Device;
 import com.example.projectlimbrescue.db.reading.Reading;
-import com.example.projectlimbrescue.db.reading.ReadingDao;
 import com.example.projectlimbrescue.db.session.SessionDao;
 import com.example.projectlimbrescue.db.session.SessionWithDevices;
-import com.example.projectlimbrescue.db.session.SessionWithReadings;
 import com.example.shared.ReadingLimb;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,8 +43,8 @@ public class HistoryFragment extends Fragment {
 
     // ViewHolder subclass for HistoryFragment RecyclerView
     private class HistoryHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private TextView mSessionIDTextView;
-        private TextView mDateTextView;
+        private final TextView mSessionIDTextView;
+        private final TextView mDateTextView;
         private SessionWithDevices mSession;
 
         public HistoryHolder(LayoutInflater inflater, ViewGroup parent) {
@@ -62,11 +58,17 @@ public class HistoryFragment extends Fragment {
         public void bind(SessionWithDevices session) {
             mSession = session;
 
-            String armText;
+            String armText = "";
             if (mSession.devices.size() > 1) {
                 armText = "Both limbs";
             } else {
-                armText = mSession.devices.get(0).limb.toString();
+                try {
+                    List<Reading> readings = db.readingDao().getReadingsForSessionIdAndLimb(mSession.session.sessionId,
+                            ReadingLimb.LEFT_ARM).get();
+                    armText = readings.size() > 0 ? ReadingLimb.LEFT_ARM.toString() : ReadingLimb.RIGHT_ARM.toString();
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             mSessionIDTextView.setText(armText);
@@ -80,85 +82,6 @@ public class HistoryFragment extends Fragment {
             Intent intent = new Intent(getContext(), DataAnalysisActivity.class);
             intent.putExtra("SESSION_ID", mSession.session.sessionId);
             startActivity(intent);
-
-            // get a sessionWithReadings from database
-//            long[] sessionID = {mSession.session.sessionId};
-//
-//            AppDatabase db = DatabaseSingleton.getInstance(getContext());
-//            ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());
-//
-//            ListenableFuture<List<SessionWithReadings>> sessionWithReadingsFuture = db.sessionDao()
-//                    .getSessionsWithReadingsByIds(sessionID);
-//            sessionWithReadingsFuture.addListener(() -> {
-//                List<SessionWithReadings> sessionWithReadings = null;
-//                try {
-//                    sessionWithReadings = sessionWithReadingsFuture.get();
-//                } catch (ExecutionException | InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                // TODO: ask Cole for getReadingsBySessionId() to simplify
-//
-//                // get the readings
-//                List<Reading> readings = new LinkedList<>();
-//                if (sessionWithReadings.size() > 0) {
-//                    readings.addAll(sessionWithReadings.get(0).readings);
-//                }
-//
-//                // left limb x & y values
-//                List<Long> xValsLeft = new LinkedList<>();
-//                List<Double> yValsLeft = new LinkedList<>();
-//
-//                // right limb x & y values
-//                List<Long> xValsRight = new LinkedList<>();
-//                List<Double> yValsRight = new LinkedList<>();
-//
-//                final long startTime = mSession.session.startTime.getTime();
-//                // put times into xVals
-//                for (Reading r : readings) {
-//                    if (r.limb == ReadingLimb.LEFT_ARM) {
-//                        xValsLeft.add(r.time - startTime);
-//                        yValsLeft.add(r.value);
-//                    } else {
-//                        xValsRight.add(r.time - startTime);
-//                        yValsRight.add(r.value);
-//                    }
-//                }
-//
-//            /*
-//                We have to convert the List<> into primitive arrays so we can pass them to
-//                the activity
-//             */
-//
-//                long[] xLeft = new long[xValsLeft.size()];
-//                double[] yLeft = new double[yValsLeft.size()];
-//                long[] xRight = new long[xValsRight.size()];
-//                double[] yRight = new double[xValsRight.size()];
-//
-//                // insert values into left arrays
-//                for (int i = 0; i < xValsLeft.size(); i++) {
-//                    xLeft[i] = xValsLeft.get(i);
-//                    yLeft[i] = yValsLeft.get(i);
-//                }
-//
-//                // insert values into right arrays
-//                for (int i = 0; i < xValsRight.size(); i++) {
-//                    xRight[i] = xValsRight.get(i);
-//                    yRight[i] = yValsRight.get(i);
-//                }
-//
-//                // put arrays into intent
-//                Intent intent = new Intent(getContext(), GraphActivity.class);
-//                if (xLeft.length > 0) {
-//                    intent.putExtra(LEFT_X_VALUES, xLeft);
-//                    intent.putExtra(LEFT_Y_VALUES, yLeft);
-//                }
-//                if (xRight.length > 0) {
-//                    intent.putExtra(RIGHT_X_VALUES, xRight);
-//                    intent.putExtra(RIGHT_Y_VALUES, yRight);
-//                }
-//                startActivity(intent);
-//            }, service);
         }
     }
 
@@ -166,13 +89,13 @@ public class HistoryFragment extends Fragment {
 
     private class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
         // all sessions
-        private List<SessionWithDevices> mAllSessions;
+        private final List<SessionWithDevices> mAllSessions;
         // sessions from both limbs
-        private List<SessionWithDevices> mSessionsBoth;
+        private final List<SessionWithDevices> mSessionsBoth;
         // sessions from left limb
-        private List<SessionWithDevices> mSessionsLeft;
+        private final List<SessionWithDevices> mSessionsLeft;
         // sessions from right limb
-        private List<SessionWithDevices> mSessionsRight;
+        private final List<SessionWithDevices> mSessionsRight;
         // sessions used by the adapter, will be one of the above lists
         private List<SessionWithDevices> mSessions;
         // used to sort sessions
@@ -192,10 +115,16 @@ public class HistoryFragment extends Fragment {
                 if (devices.size() == 2) {
                     mSessionsBoth.add(s);
                 } else if (devices.size() == 1) {
-                    if (devices.get(0).limb == ReadingLimb.LEFT_ARM) {
-                        mSessionsLeft.add(s);
-                    } else if (devices.get(0).limb == ReadingLimb.RIGHT_ARM) {
-                        mSessionsRight.add(s);
+                    try {
+                        List<Reading> readings = db.readingDao().getReadingsForSessionIdAndLimb(s.session.sessionId,
+                                ReadingLimb.LEFT_ARM).get();
+                        if (readings.size() > 0) {
+                            mSessionsLeft.add(s);
+                        } else {
+                            mSessionsRight.add(s);
+                        }
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -265,22 +194,16 @@ public class HistoryFragment extends Fragment {
         }
 
         public void sort() {
-            Collections.sort(mSessions, mComparator);
+            mSessions.sort(mComparator);
         }
     }
 
     private RecyclerView mHistoryRecyclerView;
     private HistoryAdapter mAdapter;
-    private Spinner mLimbFilterSpinner;
-    private Spinner mDateSortSpinner;
     private AppDatabase db;
 
     public HistoryFragment() {
         // Required empty public constructor
-    }
-
-    public static HistoryFragment newInstance() {
-        return new HistoryFragment();
     }
 
     @Override
@@ -298,7 +221,7 @@ public class HistoryFragment extends Fragment {
         mHistoryRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         // set up limb filter
-        mLimbFilterSpinner = view.findViewById(R.id.history_limb_filter);
+        Spinner mLimbFilterSpinner = view.findViewById(R.id.history_limb_filter);
         ArrayAdapter<CharSequence> filterAdapter = ArrayAdapter.createFromResource(
                 getContext(), R.array.filter_array, android.R.layout.simple_spinner_item);
         filterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -333,7 +256,7 @@ public class HistoryFragment extends Fragment {
         });
 
         // set up sorting
-        mDateSortSpinner = view.findViewById(R.id.history_date_sort);
+        Spinner mDateSortSpinner = view.findViewById(R.id.history_date_sort);
         ArrayAdapter<CharSequence> sortAdapter = ArrayAdapter.createFromResource(
                 getContext(), R.array.sort_array, android.R.layout.simple_spinner_item);
         sortAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -371,6 +294,11 @@ public class HistoryFragment extends Fragment {
     }
 
     private void updateUI() {
+        // Create a temporary blank list
+        // TODO: Maybe implement a spinner for while this is loading.
+        mAdapter = new HistoryAdapter(new ArrayList<>());
+        mHistoryRecyclerView.setAdapter(mAdapter);
+
         db = DatabaseSingleton.getInstance(getContext());
         SessionDao sessionDao = db.sessionDao();
         ListeningExecutorService service = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());

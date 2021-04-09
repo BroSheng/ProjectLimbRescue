@@ -23,7 +23,4 @@ public class Device {
     // A short description of the device's type, e.g. FOSSIL_GEN_5, enumerated in DeviceDesc.
     @ColumnInfo(name = "desc")
     public DeviceDesc desc;
-
-    // The body limb or combination of limbs the device measures, e.g. LEFT_ARM, enumerated in ReadingLimb.
-    public ReadingLimb limb;
 }

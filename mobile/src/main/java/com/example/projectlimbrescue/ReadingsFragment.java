@@ -53,7 +53,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-public class ReadingsFragment extends Fragment implements DataClient.OnDataChangedListener, MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
+public class ReadingsFragment extends Fragment implements DataClient.OnDataChangedListener,
+        MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
     private static final String TAG = "Readings";
 
@@ -69,19 +70,6 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     private final List<JSONObject> readingSessions = new ArrayList<>();
     private long startTime = 0;
 
-    public ReadingsFragment() {
-        // Required empty public constructor
-    }
-
-    public static ReadingsFragment newInstance() {
-        return new ReadingsFragment();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -90,6 +78,12 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_readings, container, false);
         mSendStartMessageBtn = v.findViewById(R.id.start_reading);
+        mSendStartMessageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onStartWearableActivityClick();
+            }
+        });
 
         return v;
     }
@@ -164,7 +158,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
         Log.d(TAG, "onMessageReceived: " + messageEvent);
     }
 
-    public void onStartWearableActivityClick(View view) {
+    public void onStartWearableActivityClick() {
         Log.d(TAG, "Generating RPC");
 
         new ReadingsFragment.StartWearableActivityTask().start();

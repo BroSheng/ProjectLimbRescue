@@ -7,7 +7,6 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -42,14 +41,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.ByteBuffer;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-/*
- * TODO: Wearable activity is deprecated. We can transition away from it, but it will take some
- *  work.
- */
 public class MainActivity extends FragmentActivity implements
         DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener,
@@ -103,7 +97,7 @@ public class MainActivity extends FragmentActivity implements
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
-        AmbientModeSupport.AmbientController ambientController = AmbientModeSupport.attach(this);
+        AmbientModeSupport.attach(this);
     }
 
     @Override
@@ -163,12 +157,12 @@ public class MainActivity extends FragmentActivity implements
         this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
                                         SENSOR_REFRESH_RATE);
-        status.setText("Recording");
+        status.setText(R.string.recording_status);
     }
 
     private void stopRecording() {
         timer.stop();
-        status.setText("Sending data...");
+        status.setText(R.string.sending_data_status);
         // TODO: Programmatically get device and limb
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
@@ -176,7 +170,7 @@ public class MainActivity extends FragmentActivity implements
         String imm2 = imm.toString();
         byte[] imm3 = imm2.getBytes();
         sendSensorData(imm3);
-        status.setText("Waiting for phone...");
+        status.setText(R.string.waiting_for_phone_status);
     }
 
     private void sendSensorData(byte[] serializedReadingSession) {
@@ -211,7 +205,7 @@ public class MainActivity extends FragmentActivity implements
                 this.calibrationOffset = event.timestamp;
             }
             // Convert to a 5V analog reading.
-            float reading = (event.values[0] / event.sensor.getMaximumRange()) * 5.0f;
+            float reading = event.values[0];
             long timestamp = event.timestamp - this.calibrationOffset;
             JSONObject sensorReading = new JSONObject();
             try {
@@ -256,10 +250,10 @@ public class MainActivity extends FragmentActivity implements
         public void onEnterAmbient(Bundle ambientDetails) {
             super.onEnterAmbient(ambientDetails);
 
-            TextView status = (TextView) findViewById(R.id.status);
+            TextView status = findViewById(R.id.status);
             status.setVisibility(View.INVISIBLE);
 
-            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.INVISIBLE);
         }
 
@@ -267,10 +261,10 @@ public class MainActivity extends FragmentActivity implements
         public void onExitAmbient() {
             super.onExitAmbient();
 
-            TextView status = (TextView) findViewById(R.id.status);
+            TextView status = findViewById(R.id.status);
             status.setVisibility(View.VISIBLE);
 
-            Spinner limbChooser = (Spinner) findViewById(R.id.limb_choice);
+            Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.VISIBLE);
         }
 

@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 
 import com.androidplot.xy.CatmullRomInterpolator;
-import com.androidplot.xy.InterpolationParams;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PanZoom;
 import com.androidplot.xy.SimpleXYSeries;
@@ -53,7 +52,6 @@ public class GraphFragment extends Fragment {
      *
      * @return A new instance of fragment GraphFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static GraphFragment newInstance(String rightX, String rightY, String leftX, String leftY) {
         GraphFragment fragment = new GraphFragment();
         Bundle args = new Bundle();
@@ -116,12 +114,12 @@ public class GraphFragment extends Fragment {
         // and configure them from xml:
         LineAndPointFormatter leftLimbFormat =
                 new LineAndPointFormatter(getContext(), R.xml.line_point_formatter);
-        leftLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(4,
+        leftLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(2,
                 CatmullRomInterpolator.Type.Centripetal));
 
         LineAndPointFormatter rightLimbFormat = new LineAndPointFormatter(getContext(),
                 R.xml.right_limb_point_formatter);
-        rightLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(4,
+        rightLimbFormat.setInterpolationParams(new CatmullRomInterpolator.Params(2,
                 CatmullRomInterpolator.Type.Centripetal));
 
         // add a new series' to the xyplot:

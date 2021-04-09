@@ -17,11 +17,10 @@
         android:layout_height="fill_parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/export_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="exportData"
-        android:text="Export"
+        android:text="@string/export_label"
         android:translationX="55dp"
         android:translationY="35dp" />
 

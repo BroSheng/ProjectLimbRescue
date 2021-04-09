@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import com.androidplot.xy.CatmullRomInterpolator;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PanZoom;
 import com.androidplot.xy.SimpleXYSeries;
@@ -21,13 +20,13 @@ import com.androidplot.xy.XYSeries;
 import com.example.shared.ReadingLimb;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class GraphFragment extends Fragment {
 
@@ -113,20 +112,21 @@ public class GraphFragment extends Fragment {
         // display more decimals on range
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT);
 
+        v.findViewById(R.id.export_button).setOnClickListener(view -> exportData());
 
         return v;
     }
 
-    public void exportData(View view) {
+    public void exportData() {
         StringBuilder data = new StringBuilder();
         data.append("Limb,Time,Value");
         for (int i = 0; i < leftLimbX.size(); i++) {
             data.append("\n" + ReadingLimb.LEFT_ARM.name() + "," + leftLimbX.get(i) + "," + leftLimbY.get(i));
         }
         for (int i = 0; i < rightLimbX.size(); i++) {
-            data.append("\n" + ReadingLimb.LEFT_ARM.name() + "," + leftLimbX.get(i) + "," + leftLimbY.get(i));
+            data.append("\n" + ReadingLimb.RIGHT_ARM.name() + "," + rightLimbX.get(i) + "," + rightLimbX.get(i));
         }
-        String fileSuffix = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String fileSuffix = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(new Date());
         String filename = "export_" + fileSuffix + ".csv";
         try {
             FileOutputStream out = getContext().openFileOutput(filename, Context.MODE_PRIVATE);
@@ -137,7 +137,7 @@ public class GraphFragment extends Fragment {
             File file = new File(this.getContext().getFilesDir(), filename);
             Uri path = FileProvider.getUriForFile(context, "com.example.projectlimbrescue.fileprovider", file);
             Intent fileIntent = new Intent(Intent.ACTION_SEND);
-            fileIntent.setType("text/csv");
+            fileIntent.setDataAndType(path, "text/csv");
             fileIntent.putExtra(Intent.EXTRA_SUBJECT,"PLR Export Data");
             fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             fileIntent.putExtra(Intent.EXTRA_STREAM, path);

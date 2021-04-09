@@ -126,6 +126,51 @@ public class ReadingDaoTest {
     }
 
     @Test
+    public void insertAndGetReadingForSessionIdAndLimb() throws Exception {
+        // create and insert valid entities for foreign keys
+        Session session = new Session();
+        session.sessionId = 456;
+        session.startTime = new Timestamp(1000);
+        session.endTime = new Timestamp(2000);
+        sessionDao.insert(session).get();
+
+        Device device = new Device();
+        device.deviceId = 789;
+        device.desc = DeviceDesc.FOSSIL_GEN_5;
+        deviceDao.insert(device).get();
+
+        Sensor sensor = new Sensor();
+        sensor.sensorId = 012;
+        sensor.desc = SensorDesc.PPG;
+        sensorDao.insert(sensor).get();
+
+        // insert the readings themselves
+        Reading reading1 = new Reading();
+        reading1.readingId = 123;
+        reading1.sessionId = 456;
+        reading1.deviceId = 789;
+        reading1.sensorId = 012;
+        reading1.time = 1000;
+        reading1.value = 123.456f;
+        reading1.limb = ReadingLimb.RIGHT_ARM;
+
+        Reading reading2 = new Reading();
+        reading2.readingId = 234;
+        reading2.sessionId = 456;
+        reading2.deviceId = 789;
+        reading2.sensorId = 012;
+        reading2.time = 1000;
+        reading2.value = 123.456f;
+        reading2.limb = ReadingLimb.LEFT_ARM;
+
+        readingDao.insert(reading1, reading2).get();
+        List<Reading> readings = readingDao.getReadingsForSessionIdAndLimb(456, ReadingLimb.LEFT_ARM).get();
+
+        DbTestUtils.assertReadingEquals(reading2, readings.get(0));
+        assertEquals(1, readings.size());
+    }
+
+    @Test
     public void insertAndGetMultipleReadingsById() throws Exception {
         // create and insert valid entities for foreign keys
         Session session = new Session();

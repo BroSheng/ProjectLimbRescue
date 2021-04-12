@@ -83,7 +83,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
     private int nodesRequiredInSession = 0;
     private final List<JSONObject> readingSessions = new ArrayList<>();
-    private long startTime = 0;
+    private long startTimeNano = 0;
 
     private Drawable preparingBackground;
     private Drawable recordBackground;
@@ -340,9 +340,9 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     @WorkerThread
     private void sendStartActivityMessage(String node) {
         Instant now = Instant.now();
-        this.startTime = now.getEpochSecond() * 1000000000 + now.getNano();
+        this.startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
         Task<Integer> sendMessageTask = Wearable.getMessageClient(getActivity())
-                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(this.startTime));
+                .sendMessage(node, START_ACTIVITY_PATH, longToByteArr(this.startTimeNano));
 
         try {
             // Block on a task and get the result synchronously (because this is on a background
@@ -409,10 +409,9 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             SessionDao sessionAccess = db.sessionDao();
 
             Session session = new Session();
-            Instant now = Instant.now();
-            long endTime = now.getEpochSecond() * 1000000000 + now.getNano();
-            session.startTime = new Timestamp(startTime);
-            session.endTime = new Timestamp(endTime);
+            // Timestamps need to be in milliseconds
+            session.startTime = new Timestamp(startTimeNano / 1000000L);
+            session.endTime = new Timestamp(Instant.now().toEpochMilli());
 
             ListeningExecutorService service =
                     MoreExecutors.listeningDecorator(Executors.newCachedThreadPool());

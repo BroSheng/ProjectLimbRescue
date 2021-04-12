@@ -1,12 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/action_readings"
-        android:title="@string/readings" />
-        <!-- this is how you add icons -->
-        <!-- android:icon="@drawable/ic_search" -->
-    <item android:id="@+id/action_history"
-        android:title="@string/history" />
-        <!--android:icon="@drawable/ic_add"-->
-    <item android:id="@+id/action_settings"
-        android:title="@string/settings" />
-        <!--android:icon="@drawable/icon_settings"-->
+    <item
+        android:id="@+id/action_readings"
+        android:title="@string/readings"
+        android:icon="@drawable/ic_readings" />
+    <item
+        android:id="@+id/action_history"
+        android:title="@string/history"
+        android:icon="@drawable/ic_history" />
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings"
+        android:icon="@drawable/ic_settings" />
 </menu>

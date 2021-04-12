@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="12sp">
 
     <Spinner
         android:id="@+id/history_date_sort"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48sp"
         android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="10sp"
+        android:popupBackground="@drawable/spinner_popup_background"
+        android:background="@drawable/spinner_background"
         app:layout_constraintBottom_toTopOf="@+id/history_recycler_view"
         app:layout_constraintEnd_toStartOf="@id/history_limb_filter"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,8 +22,11 @@
     <Spinner
         android:id="@+id/history_limb_filter"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="48sp"
         android:layout_marginVertical="10dp"
+        android:layout_marginHorizontal="10sp"
+        android:popupBackground="@drawable/spinner_popup_background"
+        android:background="@drawable/spinner_background"
         app:layout_constraintBottom_toTopOf="@+id/history_recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/history_date_sort"
@@ -30,8 +36,22 @@
         android:id="@+id/history_recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/history_limb_filter" />
+
+    <ProgressBar
+        android:id="@+id/history_progress_bar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

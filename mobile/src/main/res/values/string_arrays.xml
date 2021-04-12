@@ -7,7 +7,7 @@
         <item>Right Arm</item>
     </string-array>
     <string-array name="sort_array">
-        <item>Newest Date First</item>
-        <item>Oldest Date First</item>
+        <item>Most Recent</item>
+        <item>Least Recent</item>
     </string-array>
 </resources>

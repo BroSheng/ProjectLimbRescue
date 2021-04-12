@@ -4,6 +4,8 @@
     <color name="purple_500">#771FC3</color>
     <color name="purple_700">#200D62</color>
     <color name="purple_glass">#322774</color>
+    <color name="dark_ticker">#460A68</color>
+    <color name="orange_ticker">#870F40</color>
     <color name="recording_highlight">#E25967</color>
     <color name="prepare_light">#DA6635</color>
     <color name="prepare_dark">#C31F62</color>

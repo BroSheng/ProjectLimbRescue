@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -68,7 +70,6 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     private static final String TAG = "Readings";
 
     TextView mSendStartMessageBtn;
-    // TODO: Use to update background
     RecordButtonState recordState = RecordButtonState.READY;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
@@ -76,7 +77,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     private static final String SESSION_KEY = "session";
 
     private static final int PREPARE_TIME = 3;
-    private static final int RECORDING_TIME_MILLI = 30000;
+    private static final int RECORDING_TIME = 30;
 
     private AppDatabase db;
 
@@ -87,6 +88,50 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     private Drawable preparingBackground;
     private Drawable recordBackground;
     private Drawable recordingBackground;
+    private Drawable emptyTickerBackground;
+    private Drawable prepareEmptyTickerBackground;
+
+    private RelativeLayout recordingTickerContainer;
+    private final List<ImageView> recordingTickers = new ArrayList<>();
+    private final int[] tickerNames = {
+            R.id.recordingTicker0,
+            R.id.recordingTicker1,
+            R.id.recordingTicker2,
+            R.id.recordingTicker3,
+            R.id.recordingTicker4,
+            R.id.recordingTicker5,
+            R.id.recordingTicker6,
+            R.id.recordingTicker7,
+            R.id.recordingTicker8,
+            R.id.recordingTicker9,
+            R.id.recordingTicker10,
+            R.id.recordingTicker11,
+            R.id.recordingTicker12,
+            R.id.recordingTicker13,
+            R.id.recordingTicker14,
+            R.id.recordingTicker15,
+            R.id.recordingTicker16,
+            R.id.recordingTicker17,
+            R.id.recordingTicker18,
+            R.id.recordingTicker19,
+            R.id.recordingTicker20,
+            R.id.recordingTicker21,
+            R.id.recordingTicker22,
+            R.id.recordingTicker23,
+            R.id.recordingTicker24,
+            R.id.recordingTicker25,
+            R.id.recordingTicker26,
+            R.id.recordingTicker27,
+            R.id.recordingTicker28,
+            R.id.recordingTicker29};
+
+    private RelativeLayout prepareTickerContainer;
+    private final List<ImageView> prepareTickers = new ArrayList<>();
+    private final int[] prepareNames = {
+            R.id.prepareTicker0,
+            R.id.prepareTicker1,
+            R.id.prepareTicker2
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -109,6 +154,25 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                 getResources(),
                 R.drawable.recording_button,
                 getActivity().getTheme());
+        emptyTickerBackground = ResourcesCompat.getDrawable(
+                getResources(),
+                R.drawable.empty_button,
+                getActivity().getTheme());
+        prepareEmptyTickerBackground = ResourcesCompat.getDrawable(
+                getResources(),
+                R.drawable.preparing_empty_button,
+                getActivity().getTheme());
+
+        recordingTickerContainer = v.findViewById(R.id.recordingTickers);
+        for (int ticker : tickerNames) {
+            recordingTickers.add(v.findViewById(ticker));
+        }
+
+        prepareTickerContainer = v.findViewById(R.id.prepareTickers);
+        for (int ticker : prepareNames) {
+            prepareTickers.add(v.findViewById(ticker));
+        }
+
         return v;
     }
 
@@ -121,42 +185,78 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
     private void prepareToRecord() {
         mSendStartMessageBtn.setBackground(preparingBackground);
+        for (ImageView ticker : prepareTickers) {
+            ticker.setImageDrawable(prepareEmptyTickerBackground);
+        }
+        prepareTickerContainer.setVisibility(View.VISIBLE);
         Timer prepareTimer = new Timer();
-        prepareTimer.scheduleAtFixedRate(new CountDownTimer(prepareTimer, PREPARE_TIME, this::beginRecording), 0, 1000);
+        prepareTimer.scheduleAtFixedRate(new CountDownTimer(prepareTimer), 0, 1000);
     }
 
     private void beginRecording() {
-        mSendStartMessageBtn.setBackground(recordingBackground);
-        mSendStartMessageBtn.setText(getResources().getString(R.string.recording));
-        Timer recordingTimer = new Timer();
-        recordingTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                onStartWearableActivityClick();
+        getActivity().runOnUiThread(() -> {
+            prepareTickerContainer.setVisibility(View.INVISIBLE);
+            mSendStartMessageBtn.setText(getString(R.string.recording));
+            mSendStartMessageBtn.setBackground(recordingBackground);
+            for (ImageView ticker : recordingTickers) {
+                ticker.setImageDrawable(emptyTickerBackground);
             }
-        }, RECORDING_TIME_MILLI);
+            recordingTickerContainer.setVisibility(View.VISIBLE);
+        });
+
+        Timer prepareTimer = new Timer();
+        prepareTimer.scheduleAtFixedRate(new RecordTimer(prepareTimer), 0, 1000);
         onStartWearableActivityClick();
     }
 
-    private class CountDownTimer extends TimerTask {
-        int time;
-        Runnable callback;
+    private class RecordTimer extends TimerTask {
         Timer timer;
+        int time = RECORDING_TIME;
 
-        public CountDownTimer(Timer timer, int time, Runnable callback) {
-            this.time = time + 1;
-            this.callback = callback;
+        public RecordTimer(Timer timer) {
             this.timer = timer;
         }
 
         @Override
         public void run() {
-            time--;
             int currentTime = time;
-            getActivity().runOnUiThread(() -> mSendStartMessageBtn.setText(Integer.toString(currentTime)));
+            getActivity().runOnUiThread(() -> {
+                int index = RECORDING_TIME - currentTime;
+                if (index < recordingTickers.size()) {
+                    recordingTickers.get(index).setImageDrawable(recordBackground);
+                }
+            });
+            time--;
             if (time <= 0) {
                 timer.cancel();
-                callback.run();
+                onStartWearableActivityClick();
+            }
+        }
+    }
+
+    private class CountDownTimer extends TimerTask {
+        Timer timer;
+        int time = PREPARE_TIME;
+
+        public CountDownTimer(Timer timer) {
+            this.timer = timer;
+        }
+
+        @Override
+        public void run() {
+            int currentTime = time;
+            getActivity().runOnUiThread(() -> {
+                mSendStartMessageBtn.setText(Integer.toString(currentTime));
+
+                int index = PREPARE_TIME - currentTime;
+                if (index < prepareTickers.size()) {
+                    prepareTickers.get(index).setImageDrawable(preparingBackground);
+                }
+            });
+            time--;
+            if (time < 0) {
+                timer.cancel();
+                beginRecording();
             }
         }
     }
@@ -335,6 +435,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
                 mSendStartMessageBtn.setText(getResources().getString(R.string.record));
                 mSendStartMessageBtn.setBackground(recordBackground);
+                recordingTickerContainer.setVisibility(View.INVISIBLE);
 
                 Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
                 intent.putExtra("SESSION_ID", sessionId);

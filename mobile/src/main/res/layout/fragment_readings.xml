@@ -10,13 +10,335 @@
         android:id="@+id/start_reading"
         android:layout_width="160sp"
         android:layout_height="160sp"
-        android:textSize="18sp"
+        android:layout_centerInParent="true"
         android:background="@drawable/record_button"
-        android:text="@string/record"
         android:gravity="center"
+        android:text="@string/record"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <RelativeLayout
+        android:id="@+id/recordingTickers"
+        android:layout_width="360dp"
+        android:layout_height="360dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/recordingTicker0"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="0.0sp"
+            android:translationY="-105.0sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker1"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="21.831sp"
+            android:translationY="-102.705sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker2"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="42.707sp"
+            android:translationY="-95.922sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker3"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="61.717sp"
+            android:translationY="-84.947sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker4"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="78.03sp"
+            android:translationY="-70.259sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker5"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="90.933sp"
+            android:translationY="-52.5sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker6"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="99.861sp"
+            android:translationY="-32.447sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker7"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="104.425sp"
+            android:translationY="-10.975sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker8"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="104.425sp"
+            android:translationY="10.975sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker9"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="99.861sp"
+            android:translationY="32.447sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker10"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="90.933sp"
+            android:translationY="52.5sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker11"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="78.03sp"
+            android:translationY="70.259sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker12"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="61.717sp"
+            android:translationY="84.947sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker13"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="42.707sp"
+            android:translationY="95.922sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker14"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="21.831sp"
+            android:translationY="102.705sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker15"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="0.0sp"
+            android:translationY="105.0sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker16"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-21.831sp"
+            android:translationY="102.705sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker17"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-42.707sp"
+            android:translationY="95.922sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker18"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-61.717sp"
+            android:translationY="84.947sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker19"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-78.03sp"
+            android:translationY="70.259sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker20"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-90.933sp"
+            android:translationY="52.5sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker21"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-99.861sp"
+            android:translationY="32.447sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker22"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-104.425sp"
+            android:translationY="10.975sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker23"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-104.425sp"
+            android:translationY="-10.975sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker24"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-99.861sp"
+            android:translationY="-32.447sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker25"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-90.933sp"
+            android:translationY="-52.5sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker26"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-78.03sp"
+            android:translationY="-70.259sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker27"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-61.717sp"
+            android:translationY="-84.947sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker28"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-42.707sp"
+            android:translationY="-95.922sp" />
+
+        <ImageView
+            android:id="@+id/recordingTicker29"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/record_button"
+            android:translationX="-21.831sp"
+            android:translationY="-102.705sp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/prepareTickers"
+        android:layout_width="360dp"
+        android:layout_height="360dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/prepareTicker0"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/preparing_empty_button"
+            android:translationX="0.0sp"
+            android:translationY="-105.0sp" />
+
+        <ImageView
+            android:id="@+id/prepareTicker1"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/preparing_empty_button"
+            android:translationX="90.933sp"
+            android:translationY="52.5sp" />
+
+        <ImageView
+            android:id="@+id/prepareTicker2"
+            android:layout_width="@dimen/ticker_width"
+            android:layout_height="@dimen/ticker_height"
+            android:layout_centerInParent="true"
+            android:src="@drawable/preparing_empty_button"
+            android:translationX="-90.933sp"
+            android:translationY="52.5sp" />
+
+    </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

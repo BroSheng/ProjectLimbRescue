@@ -11,4 +11,8 @@
     -->
     <string name="hello_world">Hello Square World!</string>
     <string name="export_label">Export</string>
+    <string name="no_settings_yet_p">No Settings Yet :P</string>
+    <string name="project_limb_rescue">Project Limb Rescue</string>
+    <string name="record">Record</string>
+    <string name="recording">Recording</string>
 </resources>

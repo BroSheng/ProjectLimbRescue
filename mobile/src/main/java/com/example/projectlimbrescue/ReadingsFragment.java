@@ -2,19 +2,20 @@ package com.example.projectlimbrescue;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.WorkerThread;
-import androidx.fragment.app.Fragment;
-
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
 
 import com.example.projectlimbrescue.db.AppDatabase;
 import com.example.projectlimbrescue.db.DatabaseSingleton;
@@ -50,25 +51,42 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
 public class ReadingsFragment extends Fragment implements DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
+    enum RecordButtonState {
+        READY,
+        PREPARING,
+        RECORDING
+    }
+
     private static final String TAG = "Readings";
 
-    Button mSendStartMessageBtn;
+    TextView mSendStartMessageBtn;
+    // TODO: Use to update background
+    RecordButtonState recordState = RecordButtonState.READY;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
+
+    private static final int PREPARE_TIME = 3;
+    private static final int RECORDING_TIME_MILLI = 30000;
 
     private AppDatabase db;
 
     private int nodesRequiredInSession = 0;
     private final List<JSONObject> readingSessions = new ArrayList<>();
     private long startTime = 0;
+
+    private Drawable preparingBackground;
+    private Drawable recordBackground;
+    private Drawable recordingBackground;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,14 +96,69 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_readings, container, false);
         mSendStartMessageBtn = v.findViewById(R.id.start_reading);
-        mSendStartMessageBtn.setOnClickListener(new View.OnClickListener() {
+        mSendStartMessageBtn.setOnClickListener((View view) -> recordButtonOnClick());
+        preparingBackground = ResourcesCompat.getDrawable(
+                getResources(),
+                R.drawable.preparing_button,
+                getActivity().getTheme());
+        recordBackground = ResourcesCompat.getDrawable(
+                getResources(),
+                R.drawable.record_button,
+                getActivity().getTheme());
+        recordingBackground = ResourcesCompat.getDrawable(
+                getResources(),
+                R.drawable.recording_button,
+                getActivity().getTheme());
+        return v;
+    }
+
+    private void recordButtonOnClick() {
+        if (recordState == RecordButtonState.READY) {
+            recordState = RecordButtonState.PREPARING;
+            prepareToRecord();
+        }
+    }
+
+    private void prepareToRecord() {
+        mSendStartMessageBtn.setBackground(preparingBackground);
+        Timer prepareTimer = new Timer();
+        prepareTimer.scheduleAtFixedRate(new CountDownTimer(prepareTimer, PREPARE_TIME, this::beginRecording), 0, 1000);
+    }
+
+    private void beginRecording() {
+        mSendStartMessageBtn.setBackground(recordingBackground);
+        mSendStartMessageBtn.setText(getResources().getString(R.string.recording));
+        Timer recordingTimer = new Timer();
+        recordingTimer.schedule(new TimerTask() {
             @Override
-            public void onClick(View view) {
+            public void run() {
                 onStartWearableActivityClick();
             }
-        });
+        }, RECORDING_TIME_MILLI);
+        onStartWearableActivityClick();
+    }
 
-        return v;
+    private class CountDownTimer extends TimerTask {
+        int time;
+        Runnable callback;
+        Timer timer;
+
+        public CountDownTimer(Timer timer, int time, Runnable callback) {
+            this.time = time + 1;
+            this.callback = callback;
+            this.timer = timer;
+        }
+
+        @Override
+        public void run() {
+            time--;
+            int currentTime = time;
+            getActivity().runOnUiThread(() -> mSendStartMessageBtn.setText(Integer.toString(currentTime)));
+            if (time <= 0) {
+                timer.cancel();
+                callback.run();
+            }
+        }
     }
 
     @Override
@@ -162,8 +235,6 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
         Log.d(TAG, "Generating RPC");
 
         new ReadingsFragment.StartWearableActivityTask().start();
-        String stop = "Stop";
-        mSendStartMessageBtn.setText(stop);
     }
 
     @WorkerThread
@@ -254,13 +325,16 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                     e.printStackTrace();
                 }
 
-                for(JSONObject obj : readingSessions) {
+                for (JSONObject obj : readingSessions) {
                     try {
                         JsonToDb.InsertJson(obj, sessionId, db);
                     } catch (JSONException | InterruptedException | ExecutionException e) {
                         e.printStackTrace();
                     }
                 }
+
+                mSendStartMessageBtn.setText(getResources().getString(R.string.record));
+                mSendStartMessageBtn.setBackground(recordBackground);
 
                 Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
                 intent.putExtra("SESSION_ID", sessionId);

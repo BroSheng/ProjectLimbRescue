@@ -93,28 +93,38 @@ public class DataAnalysisActivity extends AppCompatActivity {
                 List<Reading> rightArm = bothReadingsFuture.get().get(1);
 
                 // turn readings into x and y arrays
-                long[] rightTime = new long[rightArm.size()];
-                double[] rightValue = new double[rightArm.size()];
+                long[] rightTime = null;
+                double[] rightValue = null;
 
-                // fill the values
-                for (int i = 0; i < rightTime.length; i++) {
-                    rightTime[i] = rightArm.get(i).time;
-                    rightValue[i] = rightArm.get(i).value;
+                if (rightArm.size() > 0) {
+                    rightTime = new long[rightArm.size()];
+                    rightValue = new double[rightArm.size()];
+
+                    // fill the values
+                    for (int i = 0; i < rightTime.length; i++) {
+                        rightTime[i] = rightArm.get(i).time;
+                        rightValue[i] = rightArm.get(i).value;
+                    }
+
+                    smoothData(rightTime, rightValue);
                 }
 
-                smoothData(rightTime, rightValue);
+                long[] leftTime = null;
+                double[] leftValue = null;
 
-                // turn readings into x and y arrays
-                long[] leftTime = new long[leftArm.size()];
-                double[] leftValue = new double[leftArm.size()];
+                if (leftArm.size() > 0) {
+                    // turn readings into x and y arrays
+                    leftTime = new long[leftArm.size()];
+                    leftValue = new double[leftArm.size()];
 
-                // fill the values
-                for (int i = 0; i < leftTime.length; i++) {
-                    leftTime[i] = leftArm.get(i).time;
-                    leftValue[i] = leftArm.get(i).value;
+                    // fill the values
+                    for (int i = 0; i < leftTime.length; i++) {
+                        leftTime[i] = leftArm.get(i).time;
+                        leftValue[i] = leftArm.get(i).value;
+                    }
+
+                    smoothData(leftTime, leftValue);
                 }
-
-                smoothData(leftTime, leftValue);
 
                 runOnUiThread(() -> spinner.setVisibility(View.INVISIBLE));
 

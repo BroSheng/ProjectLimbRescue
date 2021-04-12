@@ -1,5 +1,9 @@
 package com.example.projectlimbrescue;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,6 +13,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Chronometer;
@@ -43,6 +48,8 @@ import org.json.JSONObject;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends FragmentActivity implements
         DataClient.OnDataChangedListener,
@@ -57,6 +64,7 @@ public class MainActivity extends FragmentActivity implements
     private static final String SENSOR_PATH = "/sensor";
     private static final String SESSION_KEY = "session";
     private static final int SENSOR_REFRESH_RATE = 33333;
+    private static final int RECORD_TIME = 35000;
 
     private boolean isLogging = false;
     private SensorManager mSensorManager;
@@ -71,18 +79,31 @@ public class MainActivity extends FragmentActivity implements
 
     private TextView status;
 
+    private Timer stopFailsafe;
+
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                new Intent(getApplicationContext(), MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+
         timer = findViewById(R.id.timer);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         for (Sensor sensor : sensorList) {
             Log.d("List sensors", "Name: ${currentSensor.name} /Type_String: ${currentSensor.stringType} /Type_number: ${currentSensor.type}");
-            if(sensor.getStringType().equals("com.google.wear.sensor.ppg"))
-            {
+            if (sensor.getStringType().equals("com.google.wear.sensor.ppg")) {
                 ppgSensor = sensor.getType();
                 Log.d("Sensor", "Using of type ${currentSensor.type}");
                 break;
@@ -98,6 +119,8 @@ public class MainActivity extends FragmentActivity implements
         spinner.setOnItemSelectedListener(this);
 
         AmbientModeSupport.attach(this);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
@@ -156,21 +179,29 @@ public class MainActivity extends FragmentActivity implements
         this.calibrationOffset = -1L;
         this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
-                                        SENSOR_REFRESH_RATE);
+                SENSOR_REFRESH_RATE);
         status.setText(R.string.recording_status);
+
+        stopFailsafe = new Timer();
+        stopFailsafe.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                stopRecording();
+            }
+        }, RECORD_TIME);
     }
 
     private void stopRecording() {
-        timer.stop();
-        status.setText(R.string.sending_data_status);
+        stopFailsafe.cancel();
+        runOnUiThread(() -> {
+            timer.stop();
+            status.setText(R.string.sending_data_status);
+        });
         // TODO: Programmatically get device and limb
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
-        JSONObject imm = session.toJson();
-        String imm2 = imm.toString();
-        byte[] imm3 = imm2.getBytes();
-        sendSensorData(imm3);
-        status.setText(R.string.waiting_for_phone_status);
+        sendSensorData(session.toJson().toString().getBytes());
+        runOnUiThread(() -> status.setText(R.string.waiting_for_phone_status));
     }
 
     private void sendSensorData(byte[] serializedReadingSession) {
@@ -225,7 +256,7 @@ public class MainActivity extends FragmentActivity implements
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-        switch(adapterView.getItemAtPosition(pos).toString()) {
+        switch (adapterView.getItemAtPosition(pos).toString()) {
             case "Left Arm":
                 this.limb = ReadingLimb.LEFT_ARM;
                 break;
@@ -233,6 +264,16 @@ public class MainActivity extends FragmentActivity implements
                 this.limb = ReadingLimb.RIGHT_ARM;
                 break;
         }
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + 1000,
+                pendingIntent);
     }
 
     @Override
@@ -255,6 +296,10 @@ public class MainActivity extends FragmentActivity implements
 
             Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.INVISIBLE);
+            alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + 1000,
+                    pendingIntent);
         }
 
         @Override
@@ -266,11 +311,12 @@ public class MainActivity extends FragmentActivity implements
 
             Spinner limbChooser = findViewById(R.id.limb_choice);
             limbChooser.setVisibility(View.VISIBLE);
+
+            alarmManager.cancel(pendingIntent);
         }
 
         @Override
         public void onUpdateAmbient() {
-            // Update the content
         }
     }
 }

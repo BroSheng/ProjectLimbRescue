@@ -16,4 +16,6 @@
     <string name="record">Record</string>
     <string name="recording">Recording</string>
     <string name="please_keep_your_hands_still">Please keep your hands still.</string>
+    <string name="stop">Stop</string>
+    <string name="waiting">Waiting</string>
 </resources>

@@ -21,7 +21,6 @@ import com.example.shared.ReadingLimb;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -65,18 +64,22 @@ public class GraphFragment extends Fragment {
             long[] leftX = getArguments().getLongArray(LEFT_LIMB_X);
             double[] leftY = getArguments().getDoubleArray(LEFT_LIMB_Y);
 
-            // convert arrays to ArrayList (I can't find a better way of doing this)
-            // also have x start from 0
-            long rightStart = rightX[0];
-            for (int i = 0; i < rightX.length; i++) {
-                rightLimbX.add((rightX[i] - rightStart) / NANO_TO_SECONDS);
-                rightLimbY.add(rightY[i]);
+            if (rightX != null) {
+                // convert arrays to ArrayList (I can't find a better way of doing this)
+                // also have x start from 0
+                long rightStart = rightX[0];
+                for (int i = 0; i < rightX.length; i++) {
+                    rightLimbX.add((rightX[i] - rightStart) / NANO_TO_SECONDS);
+                    rightLimbY.add(rightY[i]);
+                }
             }
 
-            long leftStart = leftX[0];
-            for (int i = 0; i < leftX.length; i++) {
-                leftLimbX.add((leftX[i] - leftStart) / NANO_TO_SECONDS);
-                leftLimbY.add(leftY[i]);
+            if (leftX != null) {
+                long leftStart = leftX[0];
+                for (int i = 0; i < leftX.length; i++) {
+                    leftLimbX.add((leftX[i] - leftStart) / NANO_TO_SECONDS);
+                    leftLimbY.add(leftY[i]);
+                }
             }
         }
     }
@@ -94,20 +97,22 @@ public class GraphFragment extends Fragment {
         PanZoom.attach(plot);
 
         // turn the above arrays into XYSeries
-        XYSeries rightLimb = new SimpleXYSeries(rightLimbX, rightLimbY, "Right Arm");
-        XYSeries leftLimb = new SimpleXYSeries(leftLimbX, leftLimbY, "Left Arm");
+        if (rightLimbX.size() > 0) {
+            XYSeries rightLimb = new SimpleXYSeries(rightLimbX, rightLimbY, "Right Arm");
+            LineAndPointFormatter rightLimbFormat = new LineAndPointFormatter(getContext(),
+                    R.xml.right_limb_point_formatter);
+            plot.addSeries(rightLimb, rightLimbFormat);
+        }
 
-        // create formatters to use for drawing a series using LineAndPointRenderer
-        // and configure them from xml:
-        LineAndPointFormatter leftLimbFormat =
-                new LineAndPointFormatter(getContext(), R.xml.line_point_formatter);
-
-        LineAndPointFormatter rightLimbFormat = new LineAndPointFormatter(getContext(),
-                R.xml.right_limb_point_formatter);
-
-        // add a new series' to the xyplot:
-        plot.addSeries(rightLimb, rightLimbFormat);
-        plot.addSeries(leftLimb, leftLimbFormat);
+        if (leftLimbX.size() > 0) {
+            XYSeries leftLimb = new SimpleXYSeries(leftLimbX, leftLimbY, "Left Arm");
+            // create formatters to use for drawing a series using LineAndPointRenderer
+            // and configure them from xml:
+            LineAndPointFormatter leftLimbFormat =
+                    new LineAndPointFormatter(getContext(), R.xml.line_point_formatter);
+            // add a new series' to the xyplot:
+            plot.addSeries(leftLimb, leftLimbFormat);
+        }
 
         // display more decimals on range
         plot.getGraph().getLineLabelStyle(XYGraphWidget.Edge.LEFT);

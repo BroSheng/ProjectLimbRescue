@@ -7,9 +7,25 @@
     tools:context=".ReadingsFragment">
 
     <TextView
+        android:id="@+id/stop_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="160dp"
+        android:paddingVertical="12sp"
+        android:paddingHorizontal="18sp"
+        android:text="@string/stop"
+        android:textSize="16sp"
+        android:background="@drawable/stop_button"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
         android:id="@+id/reading_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20sp"
         android:text="@string/please_keep_your_hands_still"
         android:textSize="16sp"
         android:visibility="invisible"
@@ -349,7 +365,6 @@
             android:src="@drawable/preparing_empty_button"
             android:translationX="-90.933sp"
             android:translationY="52.5sp" />
-
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

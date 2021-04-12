@@ -1,6 +1,7 @@
 package com.example.projectlimbrescue;
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -66,7 +68,8 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     enum RecordButtonState {
         READY,
         PREPARING,
-        RECORDING
+        RECORDING,
+        WAITING
     }
 
     private static final String TAG = "Readings";
@@ -82,6 +85,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
     private static final int PREPARE_TIME = 3;
     private static final int RECORDING_TIME = 30;
+    private static final int DATA_GRACE_PERIOD = 3000;
 
     private AppDatabase db;
 
@@ -94,6 +98,12 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     private Drawable recordingBackground;
     private Drawable emptyTickerBackground;
     private Drawable prepareEmptyTickerBackground;
+
+    private Timer prepareTimer;
+    private Timer recordTimer;
+    private Timer waitForDataTimer;
+
+    private TextView stopButton;
 
     private RelativeLayout recordingTickerContainer;
     private final List<ImageView> recordingTickers = new ArrayList<>();
@@ -137,6 +147,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             R.id.prepareTicker2
     };
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -180,11 +191,43 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
         mReadingHint = v.findViewById(R.id.reading_hint);
         mNavBar = getActivity().findViewById(R.id.bottom_navigation);
 
+        stopButton = v.findViewById(R.id.stop_button);
+        stopButton.setOnTouchListener((view, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                view.setPressed(true);
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (recordState == RecordButtonState.PREPARING) {
+                    prepareTimer.cancel();
+                    prepareTickerContainer.setVisibility(View.INVISIBLE);
+                    mSendStartMessageBtn.setBackground(recordBackground);
+                    mSendStartMessageBtn.setText(R.string.record);
+
+                    getActivity().runOnUiThread(() -> {
+                        BottomNavigationView navBar = mNavBar;
+                        ObjectAnimator animation = ObjectAnimator.ofFloat(navBar, "translationY", 0f);
+                        animation.setDuration(200);
+                        animation.start();
+                    });
+                    stopButton.setVisibility(View.INVISIBLE);
+
+                    recordState = RecordButtonState.READY;
+                } else {
+                    recordTimer.cancel();
+                    finishRecording();
+                }
+                view.setPressed(false);
+                return false;
+            }
+            return false;
+        });
+
         return v;
     }
 
     private void recordButtonOnClick() {
         if (recordState == RecordButtonState.READY) {
+            stopButton.setVisibility(View.VISIBLE);
             recordState = RecordButtonState.PREPARING;
             prepareToRecord();
         }
@@ -203,7 +246,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             ticker.setImageDrawable(prepareEmptyTickerBackground);
         }
         prepareTickerContainer.setVisibility(View.VISIBLE);
-        Timer prepareTimer = new Timer();
+        prepareTimer = new Timer();
         prepareTimer.scheduleAtFixedRate(new CountDownTimer(prepareTimer), 0, 1000);
     }
 
@@ -218,8 +261,8 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             recordingTickerContainer.setVisibility(View.VISIBLE);
         });
 
-        Timer prepareTimer = new Timer();
-        prepareTimer.scheduleAtFixedRate(new RecordTimer(prepareTimer), 0, 1000);
+        recordTimer = new Timer();
+        recordTimer.scheduleAtFixedRate(new RecordTimer(recordTimer), 0, 1000);
         onStartWearableActivityClick();
     }
 
@@ -244,9 +287,23 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             if (time <= 0) {
                 timer.cancel();
                 getActivity().runOnUiThread(() -> mReadingHint.setVisibility(View.INVISIBLE));
-                onStartWearableActivityClick();
+                finishRecording();
             }
         }
+    }
+
+    private void finishRecording() {
+        stopButton.setVisibility(View.INVISIBLE);
+        recordState = RecordButtonState.WAITING;
+        mSendStartMessageBtn.setText(R.string.waiting);
+        waitForDataTimer = new Timer();
+        waitForDataTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                new ReadingsFragment.StoreReadingsTask().start();
+            }
+        }, DATA_GRACE_PERIOD);
+        onStartWearableActivityClick();
     }
 
     private class CountDownTimer extends TimerTask {
@@ -271,6 +328,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             time--;
             if (time < 0) {
                 timer.cancel();
+                recordState = RecordButtonState.RECORDING;
                 beginRecording();
             }
         }
@@ -327,10 +385,6 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                         readingSessions.add(new JSONObject(jsonString));
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    }
-
-                    if (readingSessions.size() >= nodesRequiredInSession) {
-                        new ReadingsFragment.StoreReadingsTask().start();
                     }
                 }
             }
@@ -455,6 +509,8 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                     animation.setDuration(200);
                     animation.start();
                 });
+
+                recordState = RecordButtonState.READY;
 
                 Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
                 intent.putExtra("SESSION_ID", sessionId);

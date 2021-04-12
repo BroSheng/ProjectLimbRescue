@@ -1,5 +1,6 @@
 package com.example.projectlimbrescue;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -37,6 +38,7 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.Wearable;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -71,6 +73,8 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
     TextView mSendStartMessageBtn;
     RecordButtonState recordState = RecordButtonState.READY;
+    TextView mReadingHint;
+    BottomNavigationView mNavBar;
 
     private static final String START_ACTIVITY_PATH = "/start-activity";
     private static final String SENSOR_PATH = "/sensor";
@@ -173,6 +177,9 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             prepareTickers.add(v.findViewById(ticker));
         }
 
+        mReadingHint = v.findViewById(R.id.reading_hint);
+        mNavBar = getActivity().findViewById(R.id.bottom_navigation);
+
         return v;
     }
 
@@ -184,6 +191,13 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
     }
 
     private void prepareToRecord() {
+        ObjectAnimator animation = ObjectAnimator.ofFloat(mNavBar, "translationY",
+                100f * getResources().getDisplayMetrics().scaledDensity);
+        animation.setDuration(200);
+        animation.start();
+
+        mReadingHint.setVisibility(View.VISIBLE);
+
         mSendStartMessageBtn.setBackground(preparingBackground);
         for (ImageView ticker : prepareTickers) {
             ticker.setImageDrawable(prepareEmptyTickerBackground);
@@ -229,6 +243,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             time--;
             if (time <= 0) {
                 timer.cancel();
+                getActivity().runOnUiThread(() -> mReadingHint.setVisibility(View.INVISIBLE));
                 onStartWearableActivityClick();
             }
         }
@@ -293,8 +308,6 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
 
         for (DataEvent event : dataEventBuffer) {
             if (event.getType() == DataEvent.TYPE_CHANGED) {
-                String stop = "Start";
-                mSendStartMessageBtn.setText(stop);
                 DataItem dataItem = event.getDataItem();
                 Uri uri = dataItem.getUri();
                 String path = uri.getPath();
@@ -351,7 +364,7 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             Log.d(TAG, "Message sent: " + result);
 
         } catch (ExecutionException exception) {
-            Log.e(TAG, "Task failed: " + exception);
+            Log.e(TAG, "Task failed on " + node + ": " + exception);
 
         } catch (InterruptedException exception) {
             Log.e(TAG, "Interrupt occurred: " + exception);
@@ -435,6 +448,13 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
                 mSendStartMessageBtn.setText(getResources().getString(R.string.record));
                 mSendStartMessageBtn.setBackground(recordBackground);
                 recordingTickerContainer.setVisibility(View.INVISIBLE);
+
+                getActivity().runOnUiThread(() -> {
+                    BottomNavigationView navBar = getActivity().findViewById(R.id.bottom_navigation);
+                    ObjectAnimator animation = ObjectAnimator.ofFloat(navBar, "translationY", 0f);
+                    animation.setDuration(200);
+                    animation.start();
+                });
 
                 Intent intent = new Intent(getActivity().getBaseContext(), DataAnalysisActivity.class);
                 intent.putExtra("SESSION_ID", sessionId);

@@ -6,22 +6,34 @@
     android:layout_height="match_parent"
     tools:context="com.example.projectlimbrescue.GraphFragment">
 
-    <com.androidplot.xy.XYPlot
-        android:id="@+id/plot"
-        style="@style/APDefacto.Light"
-        ap:domainTitle="Seconds"
-        ap:lineLabels="left|bottom"
-        ap:rangeTitle="rate"
-        ap:title="PPG Readings at 30hz"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/export_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/export_label"
-        android:translationX="55dp"
-        android:translationY="35dp" />
+        <com.androidplot.xy.XYPlot
+            android:id="@+id/plot"
+            style="@style/PLRTheme.Dark"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_margin="24sp"
+            ap:domainTitle="Seconds"
+            ap:layout_constraintBottom_toTopOf="@+id/export_button"
+            ap:layout_constraintEnd_toEndOf="parent"
+            ap:layout_constraintStart_toStartOf="parent"
+            ap:layout_constraintTop_toTopOf="parent"
+            ap:lineLabels="left|bottom"
+            ap:rangeTitle="rate"
+            ap:title="PPG Readings at 30hz" />
+
+        <Button
+            android:id="@+id/export_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:text="@string/export_label"
+            ap:layout_constraintBottom_toBottomOf="parent"
+            ap:layout_constraintEnd_toEndOf="parent"
+            ap:layout_constraintStart_toStartOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

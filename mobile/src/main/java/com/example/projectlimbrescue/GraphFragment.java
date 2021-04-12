@@ -94,8 +94,8 @@ public class GraphFragment extends Fragment {
         PanZoom.attach(plot);
 
         // turn the above arrays into XYSeries
-        XYSeries rightLimb = new SimpleXYSeries(rightLimbX, rightLimbY, "Right Limb PPG");
-        XYSeries leftLimb = new SimpleXYSeries(leftLimbX, leftLimbY, "Left Limb PPG");
+        XYSeries rightLimb = new SimpleXYSeries(rightLimbX, rightLimbY, "Right Arm");
+        XYSeries leftLimb = new SimpleXYSeries(leftLimbX, leftLimbY, "Left Arm");
 
         // create formatters to use for drawing a series using LineAndPointRenderer
         // and configure them from xml:

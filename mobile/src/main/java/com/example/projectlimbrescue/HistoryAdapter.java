@@ -136,11 +136,11 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryHolder> {
     }
 
     public void setSortDateMostRecent() {
-        mComparator = (o1, o2) -> o1.date.compareTo(o2.date);
+        mComparator = (o1, o2) -> o2.date.compareTo(o1.date);
     }
 
     public void setSortDateLeastRecent() {
-        mComparator = (o1, o2) -> o2.date.compareTo(o1.date);
+        mComparator = (o1, o2) -> o1.date.compareTo(o2.date);
     }
 
     public void sort() {

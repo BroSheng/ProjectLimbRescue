@@ -7,6 +7,17 @@
     tools:context=".ReadingsFragment">
 
     <TextView
+        android:id="@+id/reading_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/please_keep_your_hands_still"
+        android:textSize="16sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/prepareTickers" />
+
+    <TextView
         android:id="@+id/start_reading"
         android:layout_width="160sp"
         android:layout_height="160sp"

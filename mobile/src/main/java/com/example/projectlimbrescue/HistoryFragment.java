@@ -58,6 +58,18 @@ public class HistoryFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if(sessionsFuture != null) { sessionsFuture.cancel(true); }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if(sessionsFuture != null) { sessionsFuture.cancel(true); }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if(sessionsFuture != null) { sessionsFuture.cancel(true); }
@@ -165,11 +177,14 @@ public class HistoryFragment extends Fragment {
             try {
                 List<SessionWithDevices> sessions = sessionsFuture.get();
                 // If the user taps the navigation bar icon twice it will cause this listener to mess up.
-                mAdapter = new HistoryAdapter(sessions, getActivity());
-                getActivity().runOnUiThread(() -> {
-                    progressBar.setVisibility(View.INVISIBLE);
-                    mHistoryRecyclerView.setAdapter(mAdapter);
-                });
+                Activity activity = getActivity();
+                if(activity != null) {
+                    mAdapter = new HistoryAdapter(sessions, activity);
+                    activity.runOnUiThread(() -> {
+                        progressBar.setVisibility(View.INVISIBLE);
+                        mHistoryRecyclerView.setAdapter(mAdapter);
+                    });
+                }
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }

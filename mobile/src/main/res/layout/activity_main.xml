@@ -30,6 +30,8 @@
         android:background="@color/purple_glass"
         app:itemIconTint="@color/nav_bar_item"
         app:itemTextColor="@color/nav_bar_item"
+        app:itemTextAppearanceActive="@style/BottomBarTextStyle"
+        app:itemTextAppearanceInactive="@style/BottomBarTextStyle"
         app:menu="@menu/bottom_navigation_menu" />
 
 

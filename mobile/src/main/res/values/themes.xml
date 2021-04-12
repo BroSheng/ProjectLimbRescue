@@ -77,4 +77,8 @@
         <item name="legendTextColor">@color/white</item>
         <item name="legendWidthMode">relative</item>
     </style>
+
+    <style name="BottomBarTextStyle" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">@dimen/navigation_bar_font_size</item>
+    </style>
 </resources>

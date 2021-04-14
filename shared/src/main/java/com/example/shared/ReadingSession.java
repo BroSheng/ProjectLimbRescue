@@ -50,6 +50,11 @@ public class ReadingSession {
         sensors.add(list);
     }
 
+    /**
+     * Converts the ReadingSession to a JSON object using the above format.
+     * 
+     * @return JSON Object of the session.
+     */
     public JSONObject toJson() {
         JSONArray sensors = new JSONArray();
         for(int i = 0; i < this.sensors.size(); i++) {

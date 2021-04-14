@@ -40,6 +40,12 @@ public class SensorReadingList {
         this.desc = type;
     }
 
+    /**
+     * Constructs a JSON object with the sensor type and readings array and populates
+     * it with the information in <code>obj</code>.
+     * 
+     * @param obj A JSON object of the format above.
+     */
     public SensorReadingList(JSONObject obj) {
         this.readings = new ArrayList<>();
         JSONArray readings = obj.getJSONArray("readings");
@@ -49,10 +55,20 @@ public class SensorReadingList {
         this.desc = SensorDesc.valueOf(obj.getString("desc"));
     }
 
+    /**
+     * Adds a reading to the reading list.
+     * 
+     * @param reading Reading to add.
+     */
     public void addReading(JSONObject reading) {
         this.readings.add(reading);
     }
 
+    /**
+     * Converts to a JSON Object of the above format.
+     * 
+     * @return The new JSON Object.
+     */
     public JSONObject toJson() {
         JSONArray readings = new JSONArray();
         for(int i = 0; i < this.readings.size(); i++) {

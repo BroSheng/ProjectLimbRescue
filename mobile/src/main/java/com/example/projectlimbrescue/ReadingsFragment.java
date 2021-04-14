@@ -62,51 +62,110 @@ import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
+/**
+ * This fragment is for recording readings. It displays a "record" button and when a user presses it they
+ * get a 3 second countdown before recording. The recording lasts 30 seconds and after there is a 5
+ * second grace period when the watches are expected to send their data. Then the user is taken to a
+ * graph to display the data. At any time while recording is preparing or running a user can hit the
+ * "stop" button. If the app was preparing, it simply cancels the recording session. If the app was
+ * recording, it collects the data and shows what was collected.
+ */
 public class ReadingsFragment extends Fragment implements DataClient.OnDataChangedListener,
         MessageClient.OnMessageReceivedListener, CapabilityClient.OnCapabilityChangedListener {
 
+    /**
+     * The state at which the recording is at.
+     */
     enum RecordButtonState {
+        /** Ready to record new data. */
         READY,
+        /** Counting down to record. */
         PREPARING,
+        /** Actively recording. */
         RECORDING,
+        /** Waiting for watch information. */
         WAITING
     }
 
+    /** Tag for debug messages. */
     private static final String TAG = "Readings";
 
+    /** Record button in the middle of the screen. */
     TextView mSendStartMessageBtn;
+
+    /** State of the record button. */
     RecordButtonState recordState = RecordButtonState.READY;
+
+    /** Hint to keep hands still while recording. */
     TextView mReadingHint;
+
+    /** Reference to navigation bar from MainActivity. */
     BottomNavigationView mNavBar;
 
+    /** Path to send to watch to start recording. */
     private static final String START_ACTIVITY_PATH = "/start-activity";
+
+    /** Path to receive sensor data from watch at. */
     private static final String SENSOR_PATH = "/sensor";
+
+    /** Key for data communication with watch. */
     private static final String SESSION_KEY = "session";
 
+    /** Time to count down before recording in seconds. */
     private static final int PREPARE_TIME = 3;
+
+    /** Time to record in seconds. */
     private static final int RECORDING_TIME = 30;
+
+    /** Time to wait for watch info after recording in milliseconds. */
     private static final int DATA_GRACE_PERIOD = 3000;
 
+    /** Reference to the database singleton. */
     private AppDatabase db;
 
+    /** Number of devices giving data required for session to be down. */
     private int nodesRequiredInSession = 0;
+
+    /** List of the readings in the current session. */
     private final List<JSONObject> readingSessions = new ArrayList<>();
+
+    /** Start time of the current session in nanoseconds. */
     private long startTimeNano = 0;
 
+    /** Record button background for preparing to record. */
     private Drawable preparingBackground;
+    
+    /** Default button background for the record button. */
     private Drawable recordBackground;
+
+    /** Background for when record button is recording. */
     private Drawable recordingBackground;
+
+    /** Image for a ticker that is empty. */
     private Drawable emptyTickerBackground;
+    
+    /** Image for a ticker that is empty, but orange. */
     private Drawable prepareEmptyTickerBackground;
 
+    /** Timer for allowing a user to get ready for recording. */
     private Timer prepareTimer;
+
+    /** Timer for recording. */
     private Timer recordTimer;
+
+    /** Timer for waiting for data from devices. */
     private Timer waitForDataTimer;
 
+    /** Stop button that appears after recording is pressed. */
     private TextView stopButton;
 
+    /** Tickers that appear when recording starts. */
     private RelativeLayout recordingTickerContainer;
+
+    /** List of the recording ticker views. */
     private final List<ImageView> recordingTickers = new ArrayList<>();
+
+    /** List of the recording ticker IDs. */
     private final int[] tickerNames = {
             R.id.recordingTicker0,
             R.id.recordingTicker1,
@@ -139,8 +198,13 @@ public class ReadingsFragment extends Fragment implements DataClient.OnDataChang
             R.id.recordingTicker28,
             R.id.recordingTicker29};
 
+    /** Tickers that appear when preparing to record. */
     private RelativeLayout prepareTickerContainer;
+
+    /** List of preparing ticker views. */
     private final List<ImageView> prepareTickers = new ArrayList<>();
+
+    /** List of preparing ticker IDs. */
     private final int[] prepareNames = {
             R.id.prepareTicker0,
             R.id.prepareTicker1,

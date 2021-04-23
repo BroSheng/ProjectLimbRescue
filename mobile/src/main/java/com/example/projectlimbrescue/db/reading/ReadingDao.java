@@ -31,4 +31,7 @@ public interface ReadingDao {
 
     @Delete
     ListenableFuture<Integer> delete(Reading reading);
+
+    @Query("DELETE FROM Reading")
+    ListenableFuture<Integer> deleteAll();
 }

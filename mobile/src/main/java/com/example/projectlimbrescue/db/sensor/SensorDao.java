@@ -53,4 +53,7 @@ public interface SensorDao {
 
     @Delete
     ListenableFuture<Integer> delete(Sensor sensor);
+
+    @Query("DELETE FROM Sensor")
+    ListenableFuture<Integer> deleteAll();
 }

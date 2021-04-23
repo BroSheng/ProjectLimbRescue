@@ -54,4 +54,7 @@ public interface DeviceDao {
 
     @Delete
     ListenableFuture<Integer> delete(Device device);
+
+    @Query("DELETE FROM Device")
+    ListenableFuture<Integer> deleteAll();
 }

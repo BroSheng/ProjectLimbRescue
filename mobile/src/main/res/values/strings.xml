@@ -9,6 +9,8 @@
     <string name="clear_all_data">Clear All Data</string>
     <string name="clear_data_warning">Are you sure? The data will be unrecoverable.</string>
     <string name="confirm_clear_data">Confirm</string>
+
+    <string name="export_all_data">Export All Data</string>
     <!--
     This string is used for square devices and overridden by hello_world in
     values-round/strings.xml for round devices.

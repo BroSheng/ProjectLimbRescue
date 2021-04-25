@@ -3,6 +3,7 @@ package com.example.projectlimbrescue.db.device;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.Query;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -18,4 +19,7 @@ public interface DeviceContainsSensorDao {
 
     @Delete
     ListenableFuture<Integer> delete(DeviceContainsSensor deviceContainsSensor);
+
+    @Query("DELETE FROM DeviceContainsSensor")
+    ListenableFuture<Integer> deleteAll();
 }

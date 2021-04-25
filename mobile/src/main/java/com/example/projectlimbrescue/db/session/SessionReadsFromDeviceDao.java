@@ -3,6 +3,7 @@ package com.example.projectlimbrescue.db.session;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.Query;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -18,4 +19,7 @@ public interface SessionReadsFromDeviceDao {
 
     @Delete
     ListenableFuture<Integer> delete(SessionReadsFromDevice sessionReadingFromDevice);
+
+    @Query("DELETE FROM SessionReadsFromDevice")
+    ListenableFuture<Integer> deleteAll();
 }

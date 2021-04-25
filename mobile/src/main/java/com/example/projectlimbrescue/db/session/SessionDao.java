@@ -49,4 +49,7 @@ public interface SessionDao {
 
     @Delete
     ListenableFuture<Integer> delete(Session session);
+
+    @Query("DELETE FROM Session")
+    ListenableFuture<Integer> deleteAll();
 }

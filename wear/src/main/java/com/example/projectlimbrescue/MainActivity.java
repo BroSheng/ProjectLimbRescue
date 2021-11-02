@@ -45,6 +45,11 @@ import com.google.android.gms.wearable.Wearable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.List;
@@ -262,7 +267,7 @@ public class MainActivity extends FragmentActivity implements
         PutDataMapRequest dataMap = PutDataMapRequest.create(SENSOR_PATH);
         dataMap.getDataMap().putByteArray(SESSION_KEY, serializedReadingSession);
         dataMap.getDataMap().putLong("time", new Date().getTime());
-
+        Log.d(TAG, "Read Date: "+serializedReadingSession.toString());
         PutDataRequest putDataRequest = dataMap.asPutDataRequest();
         putDataRequest.setUrgent();
 
@@ -274,6 +279,40 @@ public class MainActivity extends FragmentActivity implements
                         Log.d(TAG, "Sending data was successful: " + dataItem);
                     }
                 });
+    }
+
+    /**
+     * Sends the sensor data to the server directly
+     */
+    private void sendDataToServer(){
+        try {
+            String address = "http://localhost:8081/api/v1/readingdata";
+            URL url = new URL(address);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            // Write HTTP header
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            //TODO: Write HTTP body
+            try (PrintWriter writer = new PrintWriter(connection.getOutputStream())){
+
+            }
+
+            //Get response
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null){
+                    Log.i("Get Server Response", line);
+                }
+            } finally {
+                connection.disconnect();
+            }
+
+        } catch (Exception e){
+            Log.e("ConnectServer", e.toString());
+        }
+
     }
 
     /**

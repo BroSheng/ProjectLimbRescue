@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -116,6 +117,9 @@ public class MainActivity extends FragmentActivity implements
     /** A timeout for stopping the watch is it doesn't receive a stop signal from the phone. */
     private Timer stopFailsafe;
 
+    /** The start button to start the detection **/
+    private Button button;
+
     /**
      * Update alarm and intent for ambient mode.
      * 
@@ -142,6 +146,7 @@ public class MainActivity extends FragmentActivity implements
         timer = findViewById(R.id.timer);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
+        // Get the PPG sensor from the sensor list
         List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ALL);
         for (Sensor sensor : sensorList) {
             Log.d("List sensors", "Name: ${currentSensor.name} /Type_String: ${currentSensor.stringType} /Type_number: ${currentSensor.type}");
@@ -163,6 +168,10 @@ public class MainActivity extends FragmentActivity implements
         AmbientModeSupport.attach(this);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        button = findViewById(R.id.button);
+
+        button.setActivated(false);
     }
 
     @Override
@@ -213,6 +222,7 @@ public class MainActivity extends FragmentActivity implements
             isLogging = !isLogging;
         }
     }
+
 
     /**
      * Start the reading session.
@@ -279,6 +289,14 @@ public class MainActivity extends FragmentActivity implements
                         Log.d(TAG, "Sending data was successful: " + dataItem);
                     }
                 });
+    }
+
+    /**
+     * Use this function to check if connection is ready
+     */
+    //TODO: Write the server status checker
+    private boolean ensureServerStatus(){
+        return true;
     }
 
     /**

@@ -27,17 +27,17 @@
                 android:textSize="36sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.551"
+                app:layout_constraintHorizontal_bias="0.534"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.338" />
+                app:layout_constraintVertical_bias="0.37" />
 
             <TextView
                 android:id="@+id/status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Waiting for phone..."
+                android:text="Waiting for server..."
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.509"
                 app:layout_constraintStart_toStartOf="parent"
@@ -45,14 +45,14 @@
 
             <Spinner
                 android:id="@+id/limb_choice"
-                android:layout_width="47dp"
-                android:layout_height="18dp"
+                android:layout_width="159dp"
+                android:layout_height="27dp"
                 app:layout_constraintBottom_toTopOf="@+id/timer"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.503"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.64" />
+                app:layout_constraintVertical_bias="1.0" />
 
             <Button
                 android:id="@+id/button"

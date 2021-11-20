@@ -4,14 +4,24 @@ package com.example.shared;
  * Limb that a reading was taken on.
  */
 public enum ReadingLimb {
-    LEFT_ARM {
+    LEFT_ARM_SINGLE {
         public String toString() {
-            return "Left Arm";
+            return "Left Arm Single";
         }
     },
-    RIGHT_ARM {
+    RIGHT_ARM_SINGLE {
         public String toString() {
-            return "Right Arm";
+            return "Right Arm Single";
+        }
+    },
+    LEFT_ARM_BOTH {
+        public String toString() {
+            return "Left Arm Both";
+        }
+    },
+    RIGHT_ARM_BOTH {
+        public String toString() {
+            return "Right Arm Both";
         }
     };
 

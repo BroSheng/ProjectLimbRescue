@@ -110,7 +110,7 @@ public class MainActivity extends FragmentActivity implements
     private long calibrationOffset = 0L;
 
     /** Which limb the watch is on. */
-    private ReadingLimb limb = ReadingLimb.LEFT_ARM;
+    private ReadingLimb limb = ReadingLimb.LEFT_ARM_SINGLE;
 
     /** Status text at the bottom of the screen. */
     private TextView status;
@@ -381,10 +381,16 @@ public class MainActivity extends FragmentActivity implements
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         switch (adapterView.getItemAtPosition(pos).toString()) {
             case "Left(Single)":
-                this.limb = ReadingLimb.LEFT_ARM;
+                this.limb = ReadingLimb.LEFT_ARM_SINGLE;
                 break;
             case "Right(Single)":
-                this.limb = ReadingLimb.RIGHT_ARM;
+                this.limb = ReadingLimb.RIGHT_ARM_SINGLE;
+                break;
+            case "Left(Both)":
+                this.limb = ReadingLimb.LEFT_ARM_BOTH;
+                break;
+            case "Right(Both)":
+                this.limb = ReadingLimb.RIGHT_ARM_BOTH;
                 break;
         }
     }

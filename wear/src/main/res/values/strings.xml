@@ -7,5 +7,6 @@
     <string name="hello_world">Hello Square World!</string>
     <string name="recording_status">Recording</string>
     <string name="sending_data_status">Sending data…</string>
-    <string name="waiting_for_phone_status">Waiting for phone…</string>
+
+    <!--string name="waiting_for_phone_status">Waiting for phone…</string-->
 </resources>

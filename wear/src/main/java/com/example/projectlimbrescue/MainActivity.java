@@ -52,6 +52,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -171,7 +172,30 @@ public class MainActivity extends FragmentActivity implements
 
         button = findViewById(R.id.button);
 
-        button.setActivated(false);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Instant now = Instant.now();
+                long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
+                if (isLogging) {
+                    stopRecording();
+                    button.setText("Start");
+                } else {
+                    startRecording(startTimeNano);
+                    button.setText("Stop");
+                }
+
+                isLogging = !isLogging;
+            }
+        });
+
+        button.setEnabled(false);
+
+        if (isServerReachable()){
+            button.setEnabled(true);
+        }
+
+
     }
 
     @Override
@@ -236,11 +260,14 @@ public class MainActivity extends FragmentActivity implements
         this.startTime = startTime;
         this.calibrationOffset = -1L;
         this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
+
+        Log.d(TAG, "startRecording: Recording started.");
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
                 SENSOR_REFRESH_RATE);
         status.setText(R.string.recording_status);
 
         // Set a timeout for if communication is lost with the phone.
+        /*
         stopFailsafe = new Timer();
         stopFailsafe.schedule(new TimerTask() {
             @Override
@@ -248,13 +275,14 @@ public class MainActivity extends FragmentActivity implements
                 stopRecording();
             }
         }, RECORD_TIME);
+         */
     }
 
     /**
      * Stops reading session and sends data.
      */
     private void stopRecording() {
-        stopFailsafe.cancel();
+        //stopFailsafe.cancel();
         runOnUiThread(() -> {
             timer.stop();
             status.setText(R.string.sending_data_status);
@@ -262,48 +290,27 @@ public class MainActivity extends FragmentActivity implements
         // TODO: Programmatically get device and limb
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
-        sendSensorData(session.toJson().toString().getBytes());
-        runOnUiThread(() -> status.setText(R.string.waiting_for_phone_status));
-    }
+        Log.d(TAG, "stopRecording: session is" + session);
+        //TODO: Send the data to the server
+        sendDataToServer(session.toString());
+        runOnUiThread(() -> status.setText(R.string.sending_data_status));
 
-    /**
-     * Sends the sensor data as a flat byte array.
-     *  
-     * TODO: If the message couldn't be sent, it should be retried instead of giving up.
-     * 
-     * @param serializedReadingSession String to send as a byte array.
-     */
-    private void sendSensorData(byte[] serializedReadingSession) {
-        PutDataMapRequest dataMap = PutDataMapRequest.create(SENSOR_PATH);
-        dataMap.getDataMap().putByteArray(SESSION_KEY, serializedReadingSession);
-        dataMap.getDataMap().putLong("time", new Date().getTime());
-        Log.d(TAG, "Read Date: "+serializedReadingSession.toString());
-        PutDataRequest putDataRequest = dataMap.asPutDataRequest();
-        putDataRequest.setUrgent();
-
-        Task<DataItem> dataItemTask = Wearable.getDataClient(this).putDataItem(putDataRequest);
-        dataItemTask.addOnSuccessListener(
-                new OnSuccessListener<DataItem>() {
-                    @Override
-                    public void onSuccess(DataItem dataItem) {
-                        Log.d(TAG, "Sending data was successful: " + dataItem);
-                    }
-                });
     }
 
     /**
      * Use this function to check if connection is ready
      */
     //TODO: Write the server status checker
-    private boolean ensureServerStatus(){
+    private boolean isServerReachable(){
         return true;
     }
 
     /**
      * Sends the sensor data to the server directly
      */
-    private void sendDataToServer(){
+    private void sendDataToServer(String s){
         try {
+
             String address = "http://localhost:8081/api/v1/readingdata";
             URL url = new URL(address);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -330,7 +337,6 @@ public class MainActivity extends FragmentActivity implements
         } catch (Exception e){
             Log.e("ConnectServer", e.toString());
         }
-
     }
 
     /**
@@ -374,10 +380,10 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         switch (adapterView.getItemAtPosition(pos).toString()) {
-            case "Left Arm":
+            case "Left(Single)":
                 this.limb = ReadingLimb.LEFT_ARM;
                 break;
-            case "Right Arm":
+            case "Right(Single)":
                 this.limb = ReadingLimb.RIGHT_ARM;
                 break;
         }

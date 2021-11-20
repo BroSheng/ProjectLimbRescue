@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="ticker_width">18sp</dimen>
-    <dimen name="ticker_height">18sp</dimen>
-    <dimen name="navigation_bar_font_size">14sp</dimen>
-</resources>

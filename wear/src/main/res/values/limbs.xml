@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="limbs_array">
-        <item>Left(Single)</item>
-        <item>Right(Single)</item>
-        <item>Left(Both)</item>
-        <item>Right(Both)</item>
+        <item>Left</item>
+        <item>Right</item>
     </string-array>
 </resources>

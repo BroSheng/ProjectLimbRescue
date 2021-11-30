@@ -10,6 +10,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -47,16 +48,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.text.DateFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.Timer;
-import java.util.TimerTask;
+
 
 public class MainActivity extends FragmentActivity implements
         DataClient.OnDataChangedListener,
@@ -110,7 +114,7 @@ public class MainActivity extends FragmentActivity implements
     private long calibrationOffset = 0L;
 
     /** Which limb the watch is on. */
-    private ReadingLimb limb = ReadingLimb.LEFT_ARM_SINGLE;
+    private ReadingLimb limb = ReadingLimb.LEFT_ARM;
 
     /** Status text at the bottom of the screen. */
     private TextView status;
@@ -130,6 +134,15 @@ public class MainActivity extends FragmentActivity implements
      */
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
+
+    private Handler startHandler = new Handler();
+    private Handler stopHandler = new Handler();
+    private Runnable startDetectionRunnable;
+    private Runnable stopDetectionRunnable;
+    private static final int DELAY = 1000;
+    private static final String resultPostingAddress = "http://localhost:8080/reading";
+    private static final String startTimeAddress = "http://localhost:8080/start";
+    private static final String stopTimeAddress = "http://localhost:8080/stop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +183,9 @@ public class MainActivity extends FragmentActivity implements
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+
+        /*
         button = findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {
@@ -179,7 +195,7 @@ public class MainActivity extends FragmentActivity implements
                 long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
                 if (isLogging) {
                     stopRecording();
-                    button.setText("Start");
+                    button.setText("Connect");
                 } else {
                     startRecording(startTimeNano);
                     button.setText("Stop");
@@ -189,11 +205,8 @@ public class MainActivity extends FragmentActivity implements
             }
         });
 
-        button.setEnabled(false);
+        button.setEnabled(false);*/
 
-        if (isServerReachable()){
-            button.setEnabled(true);
-        }
 
 
     }
@@ -208,6 +221,44 @@ public class MainActivity extends FragmentActivity implements
         Wearable.getMessageClient(this).addListener(this);
         Wearable.getCapabilityClient(this)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE);
+
+
+
+
+        startHandler.postDelayed(startDetectionRunnable = new Runnable() {
+            @Override
+            public void run() {
+                DateFormat df = DateFormat.getDateTimeInstance();
+                df.setTimeZone(TimeZone.getTimeZone("gmt"));
+                String gmtTime = df.format(new Date());
+                Log.d(TAG, "run: Current Time is "+gmtTime);
+                try{
+                    URL startDetectionURL = new URL(startTimeAddress);
+                    HttpURLConnection connection = (HttpURLConnection) startDetectionURL.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.connect();
+                    int responseCode = connection.getResponseCode();
+                    Log.d(TAG, "run: response code: " + responseCode);
+                    if (responseCode == 200){
+                        InputStream inputStream = connection.getInputStream();
+                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                        String line;
+                        StringBuilder stringBuilder = new StringBuilder();
+                        while ((line = bufferedReader.readLine()) != null){
+                            stringBuilder.append(line);
+                        }
+                        String startTimeString = stringBuilder.toString();
+                        Log.d(TAG, "run: start time is " + startTimeString);
+                    }
+                } catch (Exception e){
+                    Log.e("ConnectServer", e.toString());
+                }
+
+                
+                startHandler.postDelayed(startDetectionRunnable, DELAY);
+            }
+        }, DELAY);
+
     }
 
     @Override
@@ -217,6 +268,8 @@ public class MainActivity extends FragmentActivity implements
         Wearable.getDataClient(this).removeListener(this);
         Wearable.getMessageClient(this).removeListener(this);
         Wearable.getCapabilityClient(this).removeListener(this);
+
+        startHandler.removeCallbacks(startDetectionRunnable);
     }
 
     @Override
@@ -298,21 +351,11 @@ public class MainActivity extends FragmentActivity implements
     }
 
     /**
-     * Use this function to check if connection is ready
-     */
-    //TODO: Write the server status checker
-    private boolean isServerReachable(){
-        return true;
-    }
-
-    /**
      * Sends the sensor data to the server directly
      */
     private void sendDataToServer(String s){
         try {
-
-            String address = "http://localhost:8081/api/v1/readingdata";
-            URL url = new URL(address);
+            URL url = new URL(resultPostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
@@ -380,17 +423,11 @@ public class MainActivity extends FragmentActivity implements
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         switch (adapterView.getItemAtPosition(pos).toString()) {
-            case "Left(Single)":
-                this.limb = ReadingLimb.LEFT_ARM_SINGLE;
+            case "Left":
+                this.limb = ReadingLimb.LEFT_ARM;
                 break;
-            case "Right(Single)":
-                this.limb = ReadingLimb.RIGHT_ARM_SINGLE;
-                break;
-            case "Left(Both)":
-                this.limb = ReadingLimb.LEFT_ARM_BOTH;
-                break;
-            case "Right(Both)":
-                this.limb = ReadingLimb.RIGHT_ARM_BOTH;
+            case "Right":
+                this.limb = ReadingLimb.RIGHT_ARM;
                 break;
         }
     }

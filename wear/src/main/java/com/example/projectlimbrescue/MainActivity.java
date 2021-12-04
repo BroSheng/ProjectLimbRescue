@@ -42,20 +42,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class MainActivity extends FragmentActivity implements
@@ -138,9 +142,9 @@ public class MainActivity extends FragmentActivity implements
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
-    private static final String resultPostingAddress = "http://10.0.2.2:8080/reading";
-    private static final String startTimeAddress = "http://10.0.2.2:8080/start";
-    private static final String stopTimeAddress = "http://10.0.2.2:8080/stop";
+    private static final String resultPostingAddress = "http://192.168.86.46:8080/reading";
+    private static final String startTimeAddress = "http://192.168.86.46:8080/start";
+    private static final String stopTimeAddress = "http://192.168.86.46:8080/stop";
 
 
     @Override
@@ -182,27 +186,6 @@ public class MainActivity extends FragmentActivity implements
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        /*
-        button = findViewById(R.id.button);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Instant now = Instant.now();
-                long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
-                if (isLogging) {
-                    stopRecording();
-                    button.setText("Connect");
-                } else {
-                    startRecording(startTimeNano);
-                    button.setText("Stop");
-                }
-
-                isLogging = !isLogging;
-            }
-        });
-
-        button.setEnabled(false);*/
 
     }
 
@@ -247,15 +230,45 @@ public class MainActivity extends FragmentActivity implements
                             }
                             String timeString = stringBuilder.toString();
                             String[] timeArray = timeString.split(";");
-                            if (timeArray.length >= 2){
+                            if (timeArray.length >= 2) {
                                 String startTimeString = timeArray[0];
-                                long delta = Long.parseLong(timeArray[1]);
+                                String endTimeString = timeArray[1];
                                 startDateTime = formatter.parse(startTimeString);
-                                Log.d(TAG, "run: Got start time is " + startDateTime.toString() + " time delta is " + delta);
+                                endDateTime = formatter.parse(endTimeString);
+                                Log.d(TAG, "run: Got start time is " + startDateTime.toString() + " end time is " + endDateTime.toString());
                                 isRunning = true;
-
+                                Timer timer = new Timer(true);
+                                TimerTask startTask = new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Log.d(TAG, "Start recording.");
+                                                Instant now = Instant.now();
+                                                long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
+                                                startRecording(startTimeNano);
+                                            }
+                                        });
+                                    }
+                                };
+                                TimerTask stopTask = new TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                Log.d(TAG, "Stop recording.");
+                                                stopRecording();
+                                            }
+                                        });
+                                    }
+                                };
+                                timer.schedule(startTask, startDateTime);
+                                timer.schedule(stopTask, endDateTime);
                             }
                         }
+                        connection.disconnect();
                     } catch (Exception e){
                         Log.e("ConnectServer", e.toString());
                     }
@@ -340,10 +353,11 @@ public class MainActivity extends FragmentActivity implements
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
         Log.d(TAG, "stopRecording: session is" + session);
-        //TODO: Send the data to the server
-        sendDataToServer(session.toString());
+        new Thread(()->{
+            sendDataToServer(session.toString());
+        }).start();
         runOnUiThread(() -> status.setText(R.string.sending_data_status));
-
+        isRunning = false;
     }
 
     /**
@@ -354,25 +368,28 @@ public class MainActivity extends FragmentActivity implements
             URL url = new URL(resultPostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
+            byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
+            String authHeaderValue = "Basic " + new String(encodedAuth);
+            connection.setRequestProperty("Authorization", authHeaderValue);
             connection.setDoOutput(true);
             // Write HTTP header
             connection.setRequestProperty("Content-Type", "application/json");
-
-            //TODO: Write HTTP body
-            try (PrintWriter writer = new PrintWriter(connection.getOutputStream())){
-
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            out.writeBytes(s);
+            out.flush();
+            out.close();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String lines;
+            StringBuffer buffer = new StringBuffer("");
+            while ((lines = reader.readLine()) != null){
+                lines = URLDecoder.decode(lines, "utf-8");
+                buffer.append(lines);
             }
-
-            //Get response
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null){
-                    Log.i("Get Server Response", line);
-                }
-            } finally {
-                connection.disconnect();
-            }
-
+            int responseCode = connection.getResponseCode();
+            Log.d(TAG, "Server Response Code: " + responseCode);
+            Log.d(TAG, "Server Response: " + buffer);
+            reader.close();
+            connection.disconnect();
         } catch (Exception e){
             Log.e("ConnectServer", e.toString());
         }

@@ -17,7 +17,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -31,17 +30,12 @@ import com.example.shared.ReadingLimb;
 import com.example.shared.ReadingSession;
 import com.example.shared.SensorDesc;
 import com.example.shared.SensorReadingList;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wearable.CapabilityClient;
 import com.google.android.gms.wearable.CapabilityInfo;
 import com.google.android.gms.wearable.DataClient;
 import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataItem;
 import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.PutDataMapRequest;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONException;
@@ -54,8 +48,10 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
-import java.time.Instant;
+import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -122,8 +118,6 @@ public class MainActivity extends FragmentActivity implements
     /** A timeout for stopping the watch is it doesn't receive a stop signal from the phone. */
     private Timer stopFailsafe;
 
-    /** The start button to start the detection **/
-    private Button button;
 
     /**
      * Update alarm and intent for ambient mode.
@@ -135,14 +129,19 @@ public class MainActivity extends FragmentActivity implements
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
 
+
+    private boolean isRunning = false;
     private Handler startHandler = new Handler();
     private Handler stopHandler = new Handler();
     private Runnable startDetectionRunnable;
     private Runnable stopDetectionRunnable;
     private static final int DELAY = 1000;
-    private static final String resultPostingAddress = "http://localhost:8080/reading";
-    private static final String startTimeAddress = "http://localhost:8080/start";
-    private static final String stopTimeAddress = "http://localhost:8080/stop";
+    private static final String serverAuthKey = "limb:limbrescue!";
+    private Date startDateTime, endDateTime;
+    private static final String resultPostingAddress = "http://10.0.2.2:8080/reading";
+    private static final String startTimeAddress = "http://10.0.2.2:8080/start";
+    private static final String stopTimeAddress = "http://10.0.2.2:8080/stop";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,8 +182,6 @@ public class MainActivity extends FragmentActivity implements
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
-
         /*
         button = findViewById(R.id.button);
 
@@ -207,8 +204,6 @@ public class MainActivity extends FragmentActivity implements
 
         button.setEnabled(false);*/
 
-
-
     }
 
     @Override
@@ -222,41 +217,52 @@ public class MainActivity extends FragmentActivity implements
         Wearable.getCapabilityClient(this)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE);
 
-
-
-
-        startHandler.postDelayed(startDetectionRunnable = new Runnable() {
-            @Override
-            public void run() {
-                DateFormat df = DateFormat.getDateTimeInstance();
-                df.setTimeZone(TimeZone.getTimeZone("gmt"));
-                String gmtTime = df.format(new Date());
+        startHandler.postDelayed(startDetectionRunnable = () -> {
+            if (!isRunning){
+                SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy HH:mm:ss");
+                formatter.setTimeZone(TimeZone.getTimeZone("gmt"));
+                String gmtTime = formatter.format(new Date());
                 Log.d(TAG, "run: Current Time is "+gmtTime);
-                try{
-                    URL startDetectionURL = new URL(startTimeAddress);
-                    HttpURLConnection connection = (HttpURLConnection) startDetectionURL.openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.connect();
-                    int responseCode = connection.getResponseCode();
-                    Log.d(TAG, "run: response code: " + responseCode);
-                    if (responseCode == 200){
-                        InputStream inputStream = connection.getInputStream();
-                        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                        String line;
-                        StringBuilder stringBuilder = new StringBuilder();
-                        while ((line = bufferedReader.readLine()) != null){
-                            stringBuilder.append(line);
-                        }
-                        String startTimeString = stringBuilder.toString();
-                        Log.d(TAG, "run: start time is " + startTimeString);
-                    }
-                } catch (Exception e){
-                    Log.e("ConnectServer", e.toString());
-                }
+                new Thread(() -> {
+                    try{
+                        byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
+                        String authHeaderValue = "Basic " + new String(encodedAuth);
+                        URL startDetectionURL = new URL(startTimeAddress);
+                        HttpURLConnection connection = (HttpURLConnection) startDetectionURL.openConnection();
+                        connection.setRequestProperty("Authorization", authHeaderValue);
+                        connection.setRequestMethod("GET");
+                        connection.setConnectTimeout(3000);
+                        connection.connect();
+                        Log.d(TAG, "Start Connection.");
+                        int responseCode = connection.getResponseCode();
+                        Log.d(TAG, "run: response code: " + responseCode);
+                        if (responseCode == 200){
+                            //isRunning = true;
+                            InputStream inputStream = connection.getInputStream();
+                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                            String line;
+                            StringBuilder stringBuilder = new StringBuilder();
+                            while ((line = bufferedReader.readLine()) != null){
+                                stringBuilder.append(line);
+                            }
+                            String timeString = stringBuilder.toString();
+                            String[] timeArray = timeString.split(";");
+                            if (timeArray.length >= 2){
+                                String startTimeString = timeArray[0];
+                                long delta = Long.parseLong(timeArray[1]);
+                                startDateTime = formatter.parse(startTimeString);
+                                Log.d(TAG, "run: Got start time is " + startDateTime.toString() + " time delta is " + delta);
+                                isRunning = true;
 
-                
-                startHandler.postDelayed(startDetectionRunnable, DELAY);
+                            }
+                        }
+                    } catch (Exception e){
+                        Log.e("ConnectServer", e.toString());
+                    }
+                }).start();
             }
+
+            startHandler.postDelayed(startDetectionRunnable, DELAY);
         }, DELAY);
 
     }
@@ -319,16 +325,6 @@ public class MainActivity extends FragmentActivity implements
                 SENSOR_REFRESH_RATE);
         status.setText(R.string.recording_status);
 
-        // Set a timeout for if communication is lost with the phone.
-        /*
-        stopFailsafe = new Timer();
-        stopFailsafe.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                stopRecording();
-            }
-        }, RECORD_TIME);
-         */
     }
 
     /**

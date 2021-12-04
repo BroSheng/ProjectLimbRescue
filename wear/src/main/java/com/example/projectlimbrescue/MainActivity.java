@@ -45,13 +45,11 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Base64;
@@ -85,9 +83,6 @@ public class MainActivity extends FragmentActivity implements
     /** Refresh the PPG sensor at 30Hz. (1/30s = 33333ms) */
     private static final int SENSOR_REFRESH_RATE = 33333;
 
-    /** Maximum time the watch can record in seconds. Used for timing out on communication error. */
-    private static final int RECORD_TIME = 35000;
-
     /** Indicates if the watch is recording data or not. */
     private boolean isLogging = false;
 
@@ -119,9 +114,6 @@ public class MainActivity extends FragmentActivity implements
     /** Status text at the bottom of the screen. */
     private TextView status;
 
-    /** A timeout for stopping the watch is it doesn't receive a stop signal from the phone. */
-    private Timer stopFailsafe;
-
 
     /**
      * Update alarm and intent for ambient mode.
@@ -136,15 +128,12 @@ public class MainActivity extends FragmentActivity implements
 
     private boolean isRunning = false;
     private Handler startHandler = new Handler();
-    private Handler stopHandler = new Handler();
     private Runnable startDetectionRunnable;
-    private Runnable stopDetectionRunnable;
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
     private static final String resultPostingAddress = "http://192.168.86.46:8080/reading";
-    private static final String startTimeAddress = "http://192.168.86.46:8080/start";
-    private static final String stopTimeAddress = "http://192.168.86.46:8080/stop";
+    private static final String timeAddress = "http://192.168.86.46:8080/start";
 
 
     @Override
@@ -210,8 +199,8 @@ public class MainActivity extends FragmentActivity implements
                     try{
                         byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
                         String authHeaderValue = "Basic " + new String(encodedAuth);
-                        URL startDetectionURL = new URL(startTimeAddress);
-                        HttpURLConnection connection = (HttpURLConnection) startDetectionURL.openConnection();
+                        URL startTimeURL = new URL(timeAddress);
+                        HttpURLConnection connection = (HttpURLConnection) startTimeURL.openConnection();
                         connection.setRequestProperty("Authorization", authHeaderValue);
                         connection.setRequestMethod("GET");
                         connection.setConnectTimeout(3000);
@@ -241,26 +230,20 @@ public class MainActivity extends FragmentActivity implements
                                 TimerTask startTask = new TimerTask() {
                                     @Override
                                     public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Log.d(TAG, "Start recording.");
-                                                Instant now = Instant.now();
-                                                long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
-                                                startRecording(startTimeNano);
-                                            }
+                                        runOnUiThread(() -> {
+                                            Log.d(TAG, "Start recording.");
+                                            Instant now = Instant.now();
+                                            long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
+                                            startRecording(startTimeNano);
                                         });
                                     }
                                 };
                                 TimerTask stopTask = new TimerTask() {
                                     @Override
                                     public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                Log.d(TAG, "Stop recording.");
-                                                stopRecording();
-                                            }
+                                        runOnUiThread(() -> {
+                                            Log.d(TAG, "Stop recording.");
+                                            stopRecording();
                                         });
                                     }
                                 };
@@ -353,9 +336,7 @@ public class MainActivity extends FragmentActivity implements
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
         Log.d(TAG, "stopRecording: session is" + session);
-        new Thread(()->{
-            sendDataToServer(session.toString());
-        }).start();
+        new Thread(()-> sendDataToServer(session.toString())).start();
         runOnUiThread(() -> status.setText(R.string.sending_data_status));
         isRunning = false;
     }
@@ -380,7 +361,7 @@ public class MainActivity extends FragmentActivity implements
             out.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String lines;
-            StringBuffer buffer = new StringBuffer("");
+            StringBuffer buffer = new StringBuffer();
             while ((lines = reader.readLine()) != null){
                 lines = URLDecoder.decode(lines, "utf-8");
                 buffer.append(lines);

@@ -133,6 +133,7 @@ public class MainActivity extends FragmentActivity implements
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
+
     private static final String readingTablePostingAddress = "http://192.168.86.23:8080/table";
     private static final String readingDataPostingAddress = "http://192.168.86.23:8080/data";
     private static final String timeAddress = "http://192.168.86.23:8080/time";
@@ -177,7 +178,6 @@ public class MainActivity extends FragmentActivity implements
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-
     }
 
     @Override
@@ -193,10 +193,10 @@ public class MainActivity extends FragmentActivity implements
 
         startHandler.postDelayed(startDetectionRunnable = () -> {
             if (!isRunning){
-                SimpleDateFormat formatter = new SimpleDateFormat("MMM-dd-yyyy HH:mm:ss");
+                SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
                 formatter.setTimeZone(TimeZone.getTimeZone("gmt"));
                 String gmtTime = formatter.format(new Date());
-                Log.d(TAG, "run: Current Time is "+gmtTime);
+                Log.d("TryToConnect", "Current Time is "+gmtTime);
                 new Thread(() -> {
                     try{
                         byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
@@ -209,9 +209,8 @@ public class MainActivity extends FragmentActivity implements
                         connection.connect();
                         int responseCode = connection.getResponseCode();
                         Log.d("Start Connection", "Response code: " + responseCode);
-                        //isRunning = !isRunning;
                         if (responseCode == 200){
-                            //isRunning = true;
+                            runOnUiThread(() -> { status.setText("Connected"); });
                             InputStream inputStream = connection.getInputStream();
                             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                             String line;
@@ -227,7 +226,7 @@ public class MainActivity extends FragmentActivity implements
                                 long delta = Long.parseLong(timeArray[2]);
                                 startDateTime = formatter.parse(startTimeString);
                                 endDateTime = formatter.parse(endTimeString);
-                                Log.d(TAG, "Got Start Time is " + startDateTime.toString() + " End Time is " + endDateTime.toString() + " Time Delta is " + delta);
+                                Log.d(TAG, "Got Start Time is " + startTimeString + " End Time is " + endTimeString + " Time Delta is " + delta);
                                 Date now = new Date();
                                 if (startDateTime.after(now)){
                                     isRunning = true;
@@ -262,6 +261,7 @@ public class MainActivity extends FragmentActivity implements
                         connection.disconnect();
                     } catch (Exception e){
                         Log.e("ConnectServer", e.toString());
+                        runOnUiThread(() -> { status.setText("Connecting to server..."); });
                     }
                 }).start();
             }

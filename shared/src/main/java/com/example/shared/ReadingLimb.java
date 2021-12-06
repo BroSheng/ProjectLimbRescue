@@ -6,12 +6,12 @@ package com.example.shared;
 public enum ReadingLimb {
     LEFT_ARM {
         public String toString() {
-            return "Left Arm";
+            return "LEFT_ARM";
         }
     },
     RIGHT_ARM {
         public String toString() {
-            return "Right Arm";
+            return "RIGHT_ARM";
         }
     };
 

@@ -133,9 +133,9 @@ public class MainActivity extends FragmentActivity implements
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
-    private static final String readingTablePostingAddress = "http://192.168.86.23:8080/reading";
+    private static final String readingTablePostingAddress = "http://192.168.86.23:8080/table";
     private static final String readingDataPostingAddress = "http://192.168.86.23:8080/data";
-    private static final String timeAddress = "http://192.168.86.23:8080/start";
+    private static final String timeAddress = "http://192.168.86.23:8080/time";
 
 
     @Override
@@ -207,9 +207,9 @@ public class MainActivity extends FragmentActivity implements
                         connection.setRequestMethod("GET");
                         connection.setConnectTimeout(3000);
                         connection.connect();
-                        Log.d(TAG, "Start Connection.");
                         int responseCode = connection.getResponseCode();
-                        Log.d(TAG, "run: response code: " + responseCode);
+                        Log.d("Start Connection", "Response code: " + responseCode);
+                        //isRunning = !isRunning;
                         if (responseCode == 200){
                             //isRunning = true;
                             InputStream inputStream = connection.getInputStream();
@@ -221,36 +221,42 @@ public class MainActivity extends FragmentActivity implements
                             }
                             String timeString = stringBuilder.toString();
                             String[] timeArray = timeString.split(";");
-                            if (timeArray.length >= 2) {
+                            if (timeArray.length >= 3) {
                                 String startTimeString = timeArray[0];
                                 String endTimeString = timeArray[1];
+                                long delta = Long.parseLong(timeArray[2]);
                                 startDateTime = formatter.parse(startTimeString);
                                 endDateTime = formatter.parse(endTimeString);
-                                Log.d(TAG, "run: Got start time is " + startDateTime.toString() + " end time is " + endDateTime.toString());
-                                isRunning = true;
-                                Timer timer = new Timer(true);
-                                TimerTask startTask = new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        runOnUiThread(() -> {
-                                            Log.d(TAG, "Start recording.");
-                                            Instant now = Instant.now();
-                                            long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
-                                            startRecording(startTimeNano);
-                                        });
-                                    }
-                                };
-                                TimerTask stopTask = new TimerTask() {
-                                    @Override
-                                    public void run() {
-                                        runOnUiThread(() -> {
-                                            Log.d(TAG, "Stop recording.");
-                                            stopRecording();
-                                        });
-                                    }
-                                };
-                                timer.schedule(startTask, startDateTime);
-                                timer.schedule(stopTask, endDateTime);
+                                Log.d(TAG, "Got Start Time is " + startDateTime.toString() + " End Time is " + endDateTime.toString() + " Time Delta is " + delta);
+                                Date now = new Date();
+                                if (startDateTime.after(now)){
+                                    isRunning = true;
+                                    Timer timer = new Timer(true);
+                                    TimerTask startTask = new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            runOnUiThread(() -> {
+                                                Log.d(TAG, "Start recording.");
+                                                Instant now = Instant.now();
+                                                long startTimeNano = now.getEpochSecond() * 1000000000 + now.getNano();
+                                                startRecording(startTimeNano);
+                                            });
+                                        }
+                                    };
+                                    TimerTask stopTask = new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            runOnUiThread(() -> {
+                                                Log.d(TAG, "Stop recording.");
+                                                stopRecording();
+                                            });
+                                        }
+                                    };
+                                    timer.schedule(startTask, startDateTime);
+                                    timer.schedule(stopTask, endDateTime);
+                                } else {
+                                    Log.d(TAG,"Invalid start time " + startTimeString);
+                                }
                             }
                         }
                         connection.disconnect();
@@ -351,11 +357,6 @@ public class MainActivity extends FragmentActivity implements
 
     private void postReadingTable(ReadingSession session){
         try{
-            JSONArray sensors = new JSONArray();
-            for(int i = 0; i < session.sensors.size(); i++) {
-                sensors.put(session.sensors.get(i).toJson());
-            }
-            Log.d("SensorData:", sensors.toString());
             URL url = new URL(readingTablePostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -366,7 +367,7 @@ public class MainActivity extends FragmentActivity implements
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             String json = new JSONObject()
-                    .put("id","")
+                    .put("id","0")
                     .put("patient_no","")
                     .put("date_created", startDateTime.toString())
                     .put("laterality", session.limb.toString())

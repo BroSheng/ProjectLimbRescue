@@ -38,6 +38,7 @@ import com.google.android.gms.wearable.MessageClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -132,8 +133,9 @@ public class MainActivity extends FragmentActivity implements
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
-    private static final String resultPostingAddress = "http://52.70.98.31:8080/reading";
-    private static final String timeAddress = "http://52.70.98.31:8080/start";
+    private static final String readingTablePostingAddress = "http://192.168.86.23:8080/reading";
+    private static final String readingDataPostingAddress = "http://192.168.86.23:8080/data";
+    private static final String timeAddress = "http://192.168.86.23:8080/start";
 
 
     @Override
@@ -315,7 +317,6 @@ public class MainActivity extends FragmentActivity implements
         this.startTime = startTime;
         this.calibrationOffset = -1L;
         this.ppgReadings = new SensorReadingList(SensorDesc.PPG);
-
         Log.d(TAG, "startRecording: Recording started.");
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(ppgSensor),
                 SENSOR_REFRESH_RATE);
@@ -335,8 +336,7 @@ public class MainActivity extends FragmentActivity implements
         // TODO: Programmatically get device and limb
         ReadingSession session = new ReadingSession(DeviceDesc.FOSSIL_GEN_5, this.limb);
         session.addSensor(this.ppgReadings);
-        Log.d(TAG, "stopRecording: session is" + session);
-        new Thread(()-> sendDataToServer(session.toString())).start();
+        new Thread(()-> sendDataToServer(session)).start();
         runOnUiThread(() -> status.setText(R.string.sending_data_status));
         isRunning = false;
     }
@@ -344,9 +344,19 @@ public class MainActivity extends FragmentActivity implements
     /**
      * Sends the sensor data to the server directly
      */
-    private void sendDataToServer(String s){
-        try {
-            URL url = new URL(resultPostingAddress);
+    private void sendDataToServer(ReadingSession session){
+        postReadingTable(session);
+        postReadingData(session);
+    }
+
+    private void postReadingTable(ReadingSession session){
+        try{
+            JSONArray sensors = new JSONArray();
+            for(int i = 0; i < session.sensors.size(); i++) {
+                sensors.put(session.sensors.get(i).toJson());
+            }
+            Log.d("SensorData:", sensors.toString());
+            URL url = new URL(readingTablePostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
@@ -355,7 +365,14 @@ public class MainActivity extends FragmentActivity implements
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(s);
+            String json = new JSONObject()
+                    .put("id","")
+                    .put("patient_no","")
+                    .put("date_created", startDateTime.toString())
+                    .put("laterality", session.limb.toString())
+                    .put("comments","")
+                    .toString();
+            out.writeBytes(json);
             out.flush();
             out.close();
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -366,36 +383,57 @@ public class MainActivity extends FragmentActivity implements
                 buffer.append(lines);
             }
             int responseCode = connection.getResponseCode();
-            Log.d(TAG, "Server Response Code: " + responseCode);
-            Log.d(TAG, "Server Response: " + buffer);
+            Log.d("PostingReadingTable", json);
+            Log.d("PostingReadingTable", "Server Response Code: " + responseCode);
+            Log.d("PostingReadingTable", "Server Response: " + buffer);
             reader.close();
             connection.disconnect();
-        } catch (Exception e){
-            Log.e("ConnectServer", e.toString());
+        } catch(Exception e) {
+            Log.e("PostingReadingTable", e.toString());
         }
     }
 
-    private void postReadingData(String s){
+    private void postReadingData(ReadingSession session){
         try{
-            URL url = new URL(resultPostingAddress);
+            JSONArray sensors = new JSONArray();
+            for(int i = 0; i < session.sensors.size(); i++) {
+                sensors.put(session.sensors.get(i).toJson());
+            }
+            Log.d("SensorData:", sensors.toString());
+            URL url = new URL(readingDataPostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
             String authHeaderValue = "Basic " + new String(encodedAuth);
+            connection.setRequestProperty("Authorization", authHeaderValue);
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            out.writeBytes(s);
+            String json = new JSONObject()
+                    .put("reading_id","")
+                    .put("time","")
+                    .put("ppg_reading", sensors.toString())
+                    .put("laterality",session.limb.toString())
+                    .toString();
+            out.writeBytes(json);
             out.flush();
             out.close();
-
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String lines;
+            StringBuffer buffer = new StringBuffer();
+            while ((lines = reader.readLine()) != null){
+                lines = URLDecoder.decode(lines, "utf-8");
+                buffer.append(lines);
+            }
+            int responseCode = connection.getResponseCode();
+            Log.d("PostingReadingData", json);
+            Log.d("PostingReadingData", "Server Response Code: " + responseCode);
+            Log.d("PostingReadingData", "Server Response: " + buffer);
+            reader.close();
+            connection.disconnect();
         } catch(Exception e) {
             Log.e("PostingReadingData", e.toString());
         }
-    }
-
-    private void postReadingTable(){
-
     }
 
 

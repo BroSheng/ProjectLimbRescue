@@ -132,8 +132,8 @@ public class MainActivity extends FragmentActivity implements
     private static final int DELAY = 1000;
     private static final String serverAuthKey = "limb:limbrescue!";
     private Date startDateTime, endDateTime;
-    private static final String resultPostingAddress = "http://192.168.86.46:8080/reading";
-    private static final String timeAddress = "http://192.168.86.46:8080/start";
+    private static final String resultPostingAddress = "http://52.70.98.31:8080/reading";
+    private static final String timeAddress = "http://52.70.98.31:8080/start";
 
 
     @Override
@@ -353,7 +353,6 @@ public class MainActivity extends FragmentActivity implements
             String authHeaderValue = "Basic " + new String(encodedAuth);
             connection.setRequestProperty("Authorization", authHeaderValue);
             connection.setDoOutput(true);
-            // Write HTTP header
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             out.writeBytes(s);
@@ -375,6 +374,31 @@ public class MainActivity extends FragmentActivity implements
             Log.e("ConnectServer", e.toString());
         }
     }
+
+    private void postReadingData(String s){
+        try{
+            URL url = new URL(resultPostingAddress);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
+            String authHeaderValue = "Basic " + new String(encodedAuth);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+            DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            out.writeBytes(s);
+            out.flush();
+            out.close();
+
+        } catch(Exception e) {
+            Log.e("PostingReadingData", e.toString());
+        }
+    }
+
+    private void postReadingTable(){
+
+    }
+
+
 
     /**
      * Converts byte array to long integer.

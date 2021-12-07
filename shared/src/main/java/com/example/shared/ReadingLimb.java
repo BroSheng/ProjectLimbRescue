@@ -13,6 +13,16 @@ public enum ReadingLimb {
         public String toString() {
             return "RIGHT_ARM";
         }
+    },
+    LEFT_ARM_BILATERAL {
+        public String toString() {
+            return "LEFT_ARM_BILATERAL";
+        }
+    },
+    RIGHT_ARM_BILATERAL {
+        public String toString() {
+            return "RIGHT_ARM_BILATERAL";
+        }
     };
 
     /**

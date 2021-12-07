@@ -139,6 +139,8 @@ public class MainActivity extends FragmentActivity implements
     private static final String timeAddress = "http://192.168.86.23:8080/time";
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -351,12 +353,21 @@ public class MainActivity extends FragmentActivity implements
      * Sends the sensor data to the server directly
      */
     private void sendDataToServer(ReadingSession session){
-        postReadingTable(session);
-        postReadingData(session);
+        int returnedID = postReadingTable(session);
+        postReadingData(session, returnedID);
     }
 
-    private void postReadingTable(ReadingSession session){
+    private int postReadingTable(ReadingSession session){
+        int returnedID = -1;
         try{
+            String laterality, comment;
+            if (session.limb == ReadingLimb.RIGHT_ARM || session.limb == ReadingLimb.LEFT_ARM){
+                laterality = session.limb.toString();
+                comment = "";
+            } else{
+                laterality = "BILATERAL";
+                comment = startDateTime.toString();
+            }
             URL url = new URL(readingTablePostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -370,8 +381,8 @@ public class MainActivity extends FragmentActivity implements
                     .put("id","0")
                     .put("patient_no","")
                     .put("date_created", startDateTime.toString())
-                    .put("laterality", session.limb.toString())
-                    .put("comments","")
+                    .put("laterality", laterality)
+                    .put("comments",comment)
                     .toString();
             out.writeBytes(json);
             out.flush();
@@ -384,6 +395,7 @@ public class MainActivity extends FragmentActivity implements
                 buffer.append(lines);
             }
             int responseCode = connection.getResponseCode();
+            returnedID = Integer.parseInt(buffer.toString());
             Log.d("PostingReadingTable", json);
             Log.d("PostingReadingTable", "Server Response Code: " + responseCode);
             Log.d("PostingReadingTable", "Server Response: " + buffer);
@@ -392,9 +404,11 @@ public class MainActivity extends FragmentActivity implements
         } catch(Exception e) {
             Log.e("PostingReadingTable", e.toString());
         }
+        return returnedID;
     }
 
-    private void postReadingData(ReadingSession session){
+    private int postReadingData(ReadingSession session, int returnedID){
+
         try{
             JSONArray sensors = new JSONArray();
             for(int i = 0; i < session.sensors.size(); i++) {
@@ -411,7 +425,7 @@ public class MainActivity extends FragmentActivity implements
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             String json = new JSONObject()
-                    .put("reading_id","")
+                    .put("reading_id", returnedID)
                     .put("time","")
                     .put("ppg_reading", sensors.toString())
                     .put("laterality",session.limb.toString())
@@ -426,6 +440,7 @@ public class MainActivity extends FragmentActivity implements
                 lines = URLDecoder.decode(lines, "utf-8");
                 buffer.append(lines);
             }
+            returnedID = Integer.parseInt(buffer.toString());
             int responseCode = connection.getResponseCode();
             Log.d("PostingReadingData", json);
             Log.d("PostingReadingData", "Server Response Code: " + responseCode);
@@ -435,6 +450,7 @@ public class MainActivity extends FragmentActivity implements
         } catch(Exception e) {
             Log.e("PostingReadingData", e.toString());
         }
+        return returnedID;
     }
 
 
@@ -485,6 +501,12 @@ public class MainActivity extends FragmentActivity implements
                 break;
             case "Right":
                 this.limb = ReadingLimb.RIGHT_ARM;
+                break;
+            case "Left(Both)":
+                this.limb = ReadingLimb.LEFT_ARM_BILATERAL;
+                break;
+            case "Right(Both)":
+                this.limb = ReadingLimb.RIGHT_ARM_BILATERAL;
                 break;
         }
     }

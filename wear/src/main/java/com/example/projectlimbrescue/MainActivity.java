@@ -378,7 +378,7 @@ public class MainActivity extends FragmentActivity implements
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
             String json = new JSONObject()
-                    .put("id","0")
+                    .put("id","1")
                     .put("patient_no","")
                     .put("date_created", startDateTime.toString())
                     .put("laterality", laterality)
@@ -396,6 +396,7 @@ public class MainActivity extends FragmentActivity implements
             }
             int responseCode = connection.getResponseCode();
             returnedID = Integer.parseInt(buffer.toString());
+            System.out.println(returnedID);
             Log.d("PostingReadingTable", json);
             Log.d("PostingReadingTable", "Server Response Code: " + responseCode);
             Log.d("PostingReadingTable", "Server Response: " + buffer);
@@ -424,12 +425,25 @@ public class MainActivity extends FragmentActivity implements
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
+            String json = "";
+            try {
+                json = new JSONObject()
+                        .put("reading_id", returnedID)
+                        .put("time","")
+                        .put("ppg_reading", sensors)
+                        .put("laterality",session.limb.toString())
+                        .toString();
+                Log.d("ReadingData", json);
+            } catch (Exception e){
+                Log.e("PostingReadingData", "When Constructing JSON " + e.toString());
+            }
+            /*
             String json = new JSONObject()
                     .put("reading_id", returnedID)
                     .put("time","")
-                    .put("ppg_reading", sensors.toString())
+                    .put("ppg_reading", sensors)
                     .put("laterality",session.limb.toString())
-                    .toString();
+                    .toString();*/
             out.writeBytes(json);
             out.flush();
             out.close();

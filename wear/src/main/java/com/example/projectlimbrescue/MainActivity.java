@@ -425,25 +425,13 @@ public class MainActivity extends FragmentActivity implements
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
             DataOutputStream out = new DataOutputStream(connection.getOutputStream());
-            String json = "";
-            try {
-                json = new JSONObject()
-                        .put("reading_id", returnedID)
-                        .put("time","")
-                        .put("ppg_reading", sensors)
-                        .put("laterality",session.limb.toString())
-                        .toString();
-                Log.d("ReadingData", json);
-            } catch (Exception e){
-                Log.e("PostingReadingData", "When Constructing JSON " + e.toString());
-            }
-            /*
             String json = new JSONObject()
                     .put("reading_id", returnedID)
                     .put("time","")
                     .put("ppg_reading", sensors)
                     .put("laterality",session.limb.toString())
-                    .toString();*/
+                    .toString();
+            Log.d("ReadingData", json);
             out.writeBytes(json);
             out.flush();
             out.close();

@@ -143,11 +143,13 @@ public class MainActivity extends FragmentActivity implements
     private Date startDateTime, endDateTime;
 
     /**
-     * Server API address
+     * Server API address.
+     *
+     * Update the backend address here.
      */
-    private static final String readingTablePostingAddress = "http://18.212.219.27:8080/table";
-    private static final String readingDataPostingAddress = "http://18.212.219.27:8080/data";
-    private static final String timeAddress = "http://18.212.219.27:8080/time";
+    private static final String readingTablePostingAddress = "http://127.0.0.1:8080/table";
+    private static final String readingDataPostingAddress = "http://127.0.0.1:8080/data";
+    private static final String timeAddress = "http://127.0.0.1:8080/time";
 
 
 

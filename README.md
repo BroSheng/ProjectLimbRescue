@@ -36,8 +36,8 @@ The `wear` module in the project contains the app that goes on the WearOS watch.
 
 ```
 1. Wait for the start signal from backend.
-2. Begin reading at 30Hz.
-3. Send the stored readings as a JSON object.
+2. Begin reading at 30Hz with requested start time and end time.
+3. Send the JSON data to backend.
 4. Repeat to step 1.
 ```
 

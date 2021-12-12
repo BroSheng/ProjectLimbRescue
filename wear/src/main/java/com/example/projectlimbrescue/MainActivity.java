@@ -126,14 +126,25 @@ public class MainActivity extends FragmentActivity implements
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
 
-
+    /** Determine if received start instruction. */
     private boolean isRunning = false;
+
+    /** Handler and runnable for creating a new thread. */
     private Handler startHandler = new Handler();
     private Runnable startDetectionRunnable;
+
+    /** Default reconnect waiting time. */
     private static final int DELAY = 1000;
-    private static final String serverAuthKey = "limb:limbrescue!";
+
+    /** Server username and password. */
+    private static final String serverAuthKey = "admin:LimbRescue2021!";
+
+    /** Start date and end date received. */
     private Date startDateTime, endDateTime;
 
+    /**
+     * Server API address
+     */
     private static final String readingTablePostingAddress = "http://18.212.219.27:8080/table";
     private static final String readingDataPostingAddress = "http://18.212.219.27:8080/data";
     private static final String timeAddress = "http://18.212.219.27:8080/time";
@@ -193,14 +204,20 @@ public class MainActivity extends FragmentActivity implements
         Wearable.getCapabilityClient(this)
                 .addListener(this, Uri.parse("wear://"), CapabilityClient.FILTER_REACHABLE);
 
+        // Run every second before received a valid start time.
         startHandler.postDelayed(startDetectionRunnable = () -> {
             if (!isRunning){
                 SimpleDateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
                 formatter.setTimeZone(TimeZone.getTimeZone("gmt"));
-                String gmtTime = formatter.format(new Date());
-                Log.d("TryToConnect", "Current Time is "+gmtTime);
+
+                // For debugging purpose.
+                // String gmtTime = formatter.format(new Date());
+                // Log.d("TryToConnect", "Current Time is "+gmtTime);
+
+                // Create a new thread to connect to backend.
                 new Thread(() -> {
                     try{
+                        // Contruct HTTP GET connection.
                         byte[] encodedAuth = Base64.getEncoder().encode(serverAuthKey.getBytes(StandardCharsets.UTF_8));
                         String authHeaderValue = "Basic " + new String(encodedAuth);
                         URL startTimeURL = new URL(timeAddress);
@@ -211,6 +228,7 @@ public class MainActivity extends FragmentActivity implements
                         connection.connect();
                         int responseCode = connection.getResponseCode();
                         Log.d("Start Connection", "Response code: " + responseCode);
+                        // If got a correct response.
                         if (responseCode == 200){
                             runOnUiThread(() -> { status.setText("Connected"); });
                             InputStream inputStream = connection.getInputStream();
@@ -228,11 +246,13 @@ public class MainActivity extends FragmentActivity implements
                                 long delta = Long.parseLong(timeArray[2]);
                                 startDateTime = formatter.parse(startTimeString);
                                 endDateTime = formatter.parse(endTimeString);
-                                Log.d(TAG, "Got Start Time is " + startTimeString + " End Time is " + endTimeString + " Time Delta is " + delta);
+                                // Log.d(TAG, "Got Start Time is " + startTimeString + " End Time is " + endTimeString + " Time Delta is " + delta);
                                 Date now = new Date();
+                                // Valid the received start date
                                 if (startDateTime.after(now)){
                                     isRunning = true;
                                     Timer timer = new Timer(true);
+                                    // Start reading.
                                     TimerTask startTask = new TimerTask() {
                                         @Override
                                         public void run() {
@@ -244,6 +264,7 @@ public class MainActivity extends FragmentActivity implements
                                             });
                                         }
                                     };
+                                    // Stop reading.
                                     TimerTask stopTask = new TimerTask() {
                                         @Override
                                         public void run() {
@@ -253,6 +274,7 @@ public class MainActivity extends FragmentActivity implements
                                             });
                                         }
                                     };
+                                    // Schedule tasks.
                                     timer.schedule(startTask, startDateTime);
                                     timer.schedule(stopTask, endDateTime);
                                 } else {
@@ -350,16 +372,25 @@ public class MainActivity extends FragmentActivity implements
     }
 
     /**
-     * Sends the sensor data to the server directly
+     * Sends the sensor data to the server directly.
+     *
+     * @param session the ReadingSession class with the reading results in it.
      */
     private void sendDataToServer(ReadingSession session){
         int returnedID = postReadingTable(session);
         postReadingData(session, returnedID);
     }
 
+    /**
+     * Post the ReadingTable to backends.
+     *
+     * @param session the ReadingSession class with the reading results in it.
+     * @return the ID assigned by the backend.
+     */
     private int postReadingTable(ReadingSession session){
         int returnedID = -1;
         try{
+            // Parse the selected arm info.
             String laterality, comment;
             if (session.limb == ReadingLimb.RIGHT_ARM || session.limb == ReadingLimb.LEFT_ARM){
                 laterality = session.limb.toString();
@@ -368,6 +399,7 @@ public class MainActivity extends FragmentActivity implements
                 laterality = "BILATERAL";
                 comment = startDateTime.toString();
             }
+            // Construct HTTP POST connection.
             URL url = new URL(readingTablePostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -387,6 +419,7 @@ public class MainActivity extends FragmentActivity implements
             out.writeBytes(json);
             out.flush();
             out.close();
+            // Get server response.
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String lines;
             StringBuffer buffer = new StringBuffer();
@@ -394,12 +427,13 @@ public class MainActivity extends FragmentActivity implements
                 lines = URLDecoder.decode(lines, "utf-8");
                 buffer.append(lines);
             }
-            int responseCode = connection.getResponseCode();
             returnedID = Integer.parseInt(buffer.toString());
             System.out.println(returnedID);
-            Log.d("PostingReadingTable", json);
-            Log.d("PostingReadingTable", "Server Response Code: " + responseCode);
-            Log.d("PostingReadingTable", "Server Response: " + buffer);
+            // For debugging purpose.
+            //int responseCode = connection.getResponseCode();
+            //Log.d("PostingReadingTable", json);
+            //Log.d("PostingReadingTable", "Server Response Code: " + responseCode);
+            //Log.d("PostingReadingTable", "Server Response: " + buffer);
             reader.close();
             connection.disconnect();
         } catch(Exception e) {
@@ -408,14 +442,21 @@ public class MainActivity extends FragmentActivity implements
         return returnedID;
     }
 
-    private int postReadingData(ReadingSession session, int returnedID){
-
+    /**
+     * Post ReadingData to the backend.
+     *
+     * @param session the ReadingSession class with the reading results in it.
+     * @param returnedID the ID assigned by the backend.
+     */
+    private void postReadingData(ReadingSession session, int returnedID){
         try{
+            // Get the reading result.
             JSONArray sensors = new JSONArray();
             for(int i = 0; i < session.sensors.size(); i++) {
                 sensors.put(session.sensors.get(i).toJson());
             }
-            Log.d("SensorData:", sensors.toString());
+            //Log.d("SensorData:", sensors.toString());
+            // Construct the HTTP POST connection.
             URL url = new URL(readingDataPostingAddress);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -444,15 +485,15 @@ public class MainActivity extends FragmentActivity implements
             }
             returnedID = Integer.parseInt(buffer.toString());
             int responseCode = connection.getResponseCode();
-            Log.d("PostingReadingData", json);
-            Log.d("PostingReadingData", "Server Response Code: " + responseCode);
-            Log.d("PostingReadingData", "Server Response: " + buffer);
+            // For debugging purpose.
+            //Log.d("PostingReadingData", json);
+            //Log.d("PostingReadingData", "Server Response Code: " + responseCode);
+            //Log.d("PostingReadingData", "Server Response: " + buffer);
             reader.close();
             connection.disconnect();
         } catch(Exception e) {
             Log.e("PostingReadingData", e.toString());
         }
-        return returnedID;
     }
 
 
